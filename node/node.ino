@@ -8,7 +8,7 @@
 #define sw1 12 //sw for change mode
 #define sw2 13 //sw for control pump
 #define sw3 15 //sw for control fan
-#define pump 2
+#define pump 33
 #define fan 4
 
 bool ctrlMode = false;

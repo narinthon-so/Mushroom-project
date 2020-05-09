@@ -1,6 +1,6 @@
 ﻿Imports System.IO.Ports
 
-Public Class Form1
+Public Class Mushroom
     Private Sub Form1_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         System.Windows.Forms.Control.CheckForIllegalCrossThreadCalls = False 'ทำให้เชื่อมต่ออุปกรณ์ภายนอกได้
         'SerialPort1.Open()
@@ -15,6 +15,16 @@ Public Class Form1
             Button_Disconnect.Visible = False
 
         Next
+
+        Label8.Visible = False
+        Label27.Visible = False
+        Label9.Visible = False
+        Label26.Visible = False
+        Button1.Visible = False
+        Button2.Visible = False
+        Button6.Visible = False
+        Button7.Visible = False
+
     End Sub
 
     Private Sub Label1_Click(sender As Object, e As EventArgs) Handles Label1.Click
@@ -64,6 +74,21 @@ Public Class Form1
         If SerialPort1.IsOpen = True Then
             SerialPort1.Close()
             Label15.Text = ""
+
+            Label17.Text = "-" 'เมื่อ disconnect จะเช็ตค่าใหม่ ซ่อนสถานะ และ ปุ่มควบคุม
+            Label18.Text = "-"
+            Label21.Text = "-"
+            Label22.Text = "-"
+            Label25.Text = "-"
+            Label8.Visible = False
+            Label27.Visible = False
+            Label9.Visible = False
+            Label26.Visible = False
+            Button1.Visible = False
+            Button2.Visible = False
+            Button6.Visible = False
+            Button7.Visible = False
+
         End If
 
         Button_Connect.Visible = True

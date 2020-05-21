@@ -38,12 +38,11 @@ const long interval = 30000;
 
 
 // REPLACE WITH YOUR NETWORK CREDENTIALS
-const char* ssid = "bale";
+const char* ssid = "ASUS";
 const char* password = "123456789";
 
 String inputMessage;
 String inputParam;
-
 const char* PARAM_INPUT_1 = "input1"; //temp
 const char* PARAM_INPUT_2 = "input2"; //humi
 
@@ -62,6 +61,8 @@ void setup() {
 
   WiFi.mode(WIFI_STA);
   WiFi.begin(ssid, password);
+  Serial.print("connecting to...");
+  Serial.println(ssid);
   while (WiFi.status() != WL_CONNECTED) {
     delay(500);
     Serial.print(".");
@@ -101,7 +102,7 @@ void setup() {
                   "<p>PumpState: " + String(pumpStateStr) + "</p>"
                   "<p>FanState: " + String(fanStateStr) + " </p>"
                   "<p>Mode: " + String(ctrlModeStr) + " </p>"
-                  "<a href=\"/P\" class = \"button button5\">pump on/off</a>"
+                  "<a href=\"/P\" class = \"button button3\">pump on/off</a>"
                   "<a href=\"/F\" class = \"button button3\">fan on/off</a>"
                   "<a href=\"/M\" class = \"button button2\">change mode</a><br>"
                   "<a href=\"/\" class = \"button\">refresh</a>"

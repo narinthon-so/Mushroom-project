@@ -23,6 +23,8 @@ bool ctrlMode;
 bool pumpState;
 bool fanState;
 
+String line = "";
+
 String inputMessage;
 String inputParam;
 const char* PARAM_INPUT_1 = "input1"; //temp
@@ -35,25 +37,25 @@ AsyncWebServer server(80);
 
 String handleTemperature() {
   float t = temp;
-  Serial.println(t);
+  //Serial.println(t);
   return String(t);
 }
 
 String handleHumidity() {
   float h = humi;
-  Serial.println(h);
+  //Serial.println(h);
   return String(h);
 }
 
 String handleHumiditylimit() {
   float sh = setHumi;
-  Serial.println(sh);
+  //Serial.println(sh);
   return String(sh);
 }
 
 String handleTemperaturelimit() {
   float st = setTemp;
-  Serial.println(st);
+  //Serial.println(st);
   return String(st);
 }
 
@@ -65,7 +67,7 @@ String handlePump(){
   else{
     pumpStateStr = "not work";
   }
-  Serial.println(pumpStateStr);
+  //Serial.println(pumpStateStr);
   return String(pumpStateStr);
 }
 
@@ -77,7 +79,7 @@ String handleFan(){
   else{
     fanStateStr = "not work";
   }
-  Serial.println(fanStateStr);
+  //Serial.println(fanStateStr);
   return String(fanStateStr);
 }
 
@@ -89,7 +91,7 @@ String handleMode(){
   else{
     ctrlModeStr = "auto";
   }
-  Serial.println(ctrlModeStr);
+  //Serial.println(ctrlModeStr);
   return String(ctrlModeStr);
 }
 
@@ -411,7 +413,7 @@ void setup() {
       inputMessage = "No message sent";
       inputParam = "none";
     }
-    Serial.println(inputMessage);
+    //Serial.println(inputMessage);
     request->send(200, "text/html", "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">"
                   "HTTP GET request sent to your ESP on input field ("
                   + inputParam + ") with value: " + inputMessage +
@@ -428,6 +430,12 @@ void setup() {
 
 
 void loop(void) {
+  
+  while (Serial.available()) { //Serial from VB
+    line = Serial.readString();
+    loraSend(node1 + line);
+  }
+  line = "";
 
   // try to parse packet
   if (LoRa.parsePacket()) {
@@ -437,7 +445,8 @@ void loop(void) {
     while (LoRa.available()) {
       if (LoRa.find(ipAddr)) { // ip address this device "
         x = LoRa.readString();
-        Serial.println(x);
+        String dataForVB = x.substring(2, 24);
+        Serial.println(dataForVB);
       }
     }
   }

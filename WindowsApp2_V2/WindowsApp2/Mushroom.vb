@@ -75,7 +75,7 @@ Public Class Mushroom
     Private Sub Button_Disconnect_Click(sender As Object, e As EventArgs) Handles Button_Disconnect.Click
         If SerialPort1.IsOpen = True Then
             SerialPort1.Close()
-            Label15.Text = ""
+            Label15.Text = "-"
 
             Label17.Text = "-" 'เมื่อ disconnect จะเช็ตค่าใหม่ ซ่อนสถานะ และ ปุ่มควบคุม
             Label18.Text = "-"
@@ -221,4 +221,5 @@ Public Class Mushroom
     Private Sub Button6_Click(sender As Object, e As EventArgs) Handles Button6.Click
         SerialPort1.Write("F0")
     End Sub
+
 End Class

@@ -1,8 +1,15 @@
 ﻿Imports System.IO.Ports
 
 Public Class Mushroom
+
     Dim temp As String
     Dim humi As String
+    Dim setTemp As String
+    Dim setHumi As String
+    Dim ctrlMode As String
+    Dim fanState As String
+    Dim pumpState As String
+
     Private Sub Form1_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         System.Windows.Forms.Control.CheckForIllegalCrossThreadCalls = False 'ทำให้เชื่อมต่ออุปกรณ์ภายนอกได้
         'SerialPort1.Open()
@@ -106,18 +113,29 @@ Public Class Mushroom
 
         Label16.Text = line                          'debug
 
-        temp = line.Substring(1, 5)              'temp  ค่าอุณหภูมิ
-        Label17.Text = temp                         'show temp
-        humi = line.Substring(7, 5)              'humi  ค่าความชื้น
-        Label18.Text = humi                         'show humi
+        Try
 
-        Dim setTemp = line.Substring(12, 2)         'setTemp  ค่าอุณภูมิที่กำหมดส่งมาจาก ESP
-        Label21.Text = setTemp                      'show setTemp
-        Dim setHumi = line.Substring(14, 2)         'setHumi  ค่าความชื้นที่ส่งมาจาก ESP
-        Label22.Text = setHumi                      'show setHumi
-        Dim ctrlMode = line.Substring(17, 1)        'โหมดการทำงานของระบบ
-        Dim pumpState = line.Substring(19, 1)       'สถานะการทำงานของ pump
-        Dim fanState = line.Substring(21, 1)        'สถานะการทำงานของ fan
+            temp = line.Substring(1, 5)              'temp  ค่าอุณหภูมิ
+            Label17.Text = temp                         'show temp
+
+            humi = line.Substring(7, 5)              'humi  ค่าความชื้น
+            Label18.Text = humi                         'show humi
+
+            setTemp = line.Substring(12, 2)         'setTemp  ค่าอุณภูมิที่กำหมดส่งมาจาก ESP
+            Label21.Text = setTemp                      'show setTemp
+
+            setHumi = line.Substring(14, 2)         'setHumi  ค่าความชื้นที่ส่งมาจาก ESP
+            Label22.Text = setHumi                      'show setHumi
+
+            ctrlMode = line.Substring(17, 1)        'โหมดการทำงานของระบบ
+            pumpState = line.Substring(19, 1)       'สถานะการทำงานของ pump
+            fanState = line.Substring(21, 1)        'สถานะการทำงานของ fan
+
+        Catch ex As Exception
+            MessageBox.Show("Error, Serial data.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
+        End Try
+
+
 
         Label23.Text = line.Length() 'debug
 
@@ -185,16 +203,47 @@ Public Class Mushroom
 
     Private Sub Button3_Click(sender As Object, e As EventArgs) Handles Button3.Click
 
-        SerialPort1.Write("T" + TextBox1.Text)
-        TextBox1.Clear()
+        If SerialPort1.IsOpen = True Then
+
+            If TextBox1.TextLength = 2 Then
+
+                SerialPort1.Write("T" + TextBox1.Text)
+                TextBox1.Clear()
+
+            Else
+
+                MessageBox.Show("The value should be between 10-99°C.", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning)
+
+            End If
+
+        ElseIf SerialPort1.IsOpen = False Then
+
+            MessageBox.Show("The serial port is closed.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
+
+        End If
 
     End Sub
 
     Private Sub Button4_Click(sender As Object, e As EventArgs) Handles Button4.Click
 
-        SerialPort1.Write("H" + TextBox2.Text)
-        TextBox2.Clear()
+        If SerialPort1.IsOpen = True Then
 
+            If TextBox2.TextLength = 2 Then
+
+                SerialPort1.Write("H" + TextBox2.Text)
+                TextBox2.Clear()
+
+            Else
+
+                MessageBox.Show("The value should be between 10-99%.", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning)
+
+            End If
+
+        ElseIf SerialPort1.IsOpen = False Then
+
+            MessageBox.Show("The serial port is closed.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
+
+        End If
 
     End Sub
 
@@ -207,7 +256,13 @@ Public Class Mushroom
     End Sub
 
     Private Sub Button5_Click(sender As Object, e As EventArgs) Handles Button5.Click
-        SerialPort1.Write("M")
+
+        Try
+            SerialPort1.Write("M")
+        Catch ex As Exception
+            MessageBox.Show("The serial port is closed.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
+        End Try
+
     End Sub
 
     Private Sub GroupBox2_Enter(sender As Object, e As EventArgs) Handles GroupBox2.Enter
@@ -222,4 +277,37 @@ Public Class Mushroom
         SerialPort1.Write("F0")
     End Sub
 
+    Private Sub TextBox1_TextChanged(sender As Object, e As EventArgs) Handles TextBox1.TextChanged
+
+        LabelDebug.Text = TextBox1.Text
+
+    End Sub
+
+    Private Sub TextBox1_KeyPress(sender As Object, e As KeyPressEventArgs) Handles TextBox1.KeyPress
+
+        'number only
+        If Asc(e.KeyChar) < 48 Or Asc(e.KeyChar) > 57 Then
+            e.Handled = True
+            MessageBox.Show("You can only input number.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
+        End If
+
+    End Sub
+
+    Private Sub TextBox2_KeyPress(sender As Object, e As KeyPressEventArgs) Handles TextBox2.KeyPress
+
+        'number only
+        If Asc(e.KeyChar) < 48 Or Asc(e.KeyChar) > 57 Then
+            e.Handled = True
+            MessageBox.Show("You can only input number.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
+        End If
+
+    End Sub
+
+    Private Sub LabelClearTemp_Click(sender As Object, e As EventArgs) Handles LabelClearTemp.Click
+        TextBox1.Clear()
+    End Sub
+
+    Private Sub LabelClearHumi_Click(sender As Object, e As EventArgs) Handles LabelClearHumi.Click
+        TextBox2.Clear()
+    End Sub
 End Class

@@ -72,6 +72,9 @@ Partial Class Mushroom
         Me.PictureBox2 = New System.Windows.Forms.PictureBox()
         Me.PictureBox3 = New System.Windows.Forms.PictureBox()
         Me.PictureBox4 = New System.Windows.Forms.PictureBox()
+        Me.LabelDebug = New System.Windows.Forms.Label()
+        Me.LabelClearTemp = New System.Windows.Forms.Label()
+        Me.LabelClearHumi = New System.Windows.Forms.Label()
         Me.GroupBox1.SuspendLayout()
         Me.GroupBox2.SuspendLayout()
         CType(Me.PictureBox1, System.ComponentModel.ISupportInitialize).BeginInit()
@@ -106,9 +109,9 @@ Partial Class Mushroom
         Me.Label3.Font = New System.Drawing.Font("Microsoft Sans Serif", 16.2!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.Label3.Location = New System.Drawing.Point(169, 313)
         Me.Label3.Name = "Label3"
-        Me.Label3.Size = New System.Drawing.Size(197, 32)
+        Me.Label3.Size = New System.Drawing.Size(190, 32)
         Me.Label3.TabIndex = 2
-        Me.Label3.Text = "Humidity         :"
+        Me.Label3.Text = "Humidity        :"
         '
         'Label4
         '
@@ -578,12 +581,46 @@ Partial Class Mushroom
         Me.PictureBox4.TabIndex = 37
         Me.PictureBox4.TabStop = False
         '
+        'LabelDebug
+        '
+        Me.LabelDebug.AutoSize = True
+        Me.LabelDebug.Location = New System.Drawing.Point(23, 75)
+        Me.LabelDebug.Name = "LabelDebug"
+        Me.LabelDebug.Size = New System.Drawing.Size(59, 17)
+        Me.LabelDebug.TabIndex = 38
+        Me.LabelDebug.Text = "Label30"
+        '
+        'LabelClearTemp
+        '
+        Me.LabelClearTemp.AutoSize = True
+        Me.LabelClearTemp.BackColor = System.Drawing.Color.White
+        Me.LabelClearTemp.Font = New System.Drawing.Font("Microsoft Sans Serif", 12.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.LabelClearTemp.Location = New System.Drawing.Point(367, 378)
+        Me.LabelClearTemp.Name = "LabelClearTemp"
+        Me.LabelClearTemp.Size = New System.Drawing.Size(27, 25)
+        Me.LabelClearTemp.TabIndex = 39
+        Me.LabelClearTemp.Text = "X"
+        '
+        'LabelClearHumi
+        '
+        Me.LabelClearHumi.AutoSize = True
+        Me.LabelClearHumi.BackColor = System.Drawing.Color.White
+        Me.LabelClearHumi.Font = New System.Drawing.Font("Microsoft Sans Serif", 12.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.LabelClearHumi.Location = New System.Drawing.Point(367, 432)
+        Me.LabelClearHumi.Name = "LabelClearHumi"
+        Me.LabelClearHumi.Size = New System.Drawing.Size(27, 25)
+        Me.LabelClearHumi.TabIndex = 40
+        Me.LabelClearHumi.Text = "X"
+        '
         'Mushroom
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(8.0!, 16.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.BackColor = System.Drawing.SystemColors.WindowFrame
         Me.ClientSize = New System.Drawing.Size(966, 675)
+        Me.Controls.Add(Me.LabelClearHumi)
+        Me.Controls.Add(Me.LabelClearTemp)
+        Me.Controls.Add(Me.LabelDebug)
         Me.Controls.Add(Me.PictureBox4)
         Me.Controls.Add(Me.PictureBox3)
         Me.Controls.Add(Me.PictureBox2)
@@ -684,4 +721,7 @@ Partial Class Mushroom
     Friend WithEvents PictureBox2 As PictureBox
     Friend WithEvents PictureBox3 As PictureBox
     Friend WithEvents PictureBox4 As PictureBox
+    Friend WithEvents LabelDebug As Label
+    Friend WithEvents LabelClearTemp As Label
+    Friend WithEvents LabelClearHumi As Label
 End Class

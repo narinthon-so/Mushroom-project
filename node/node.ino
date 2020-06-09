@@ -222,7 +222,7 @@ void loop() {
         pumpState = false;
         sendUpdateData();
       }
-      
+
     }  //pump
 
     if (digitalRead(sw3) == 0) {   //fan
@@ -230,15 +230,15 @@ void loop() {
       delay(200);
       if (fanState == false) {
         fanState = true;
-          sendUpdateData();
+        sendUpdateData();
       }
       else {
         fanState = false;
-          sendUpdateData();
+        sendUpdateData();
       }
     }  //fan
 
-    
+
 
   }
 
@@ -282,7 +282,25 @@ void loraSend(String datasend) {
   LoRa.endPacket();
 }
 
-void sendUpdateData() {
+void sendUpdateData() { //this function will call when sumting change ...
+  //--------------------------------------------------
+  //change pumpState and fanState before sendUpdateData ***if not pumpState and fanState on webserver will not be real value
+  if (ctrlMode == false) { // auto mode
+
+    if (humi < setHumi) {
+      pumpState = true;
+    } else {
+      pumpState = false;
+    }
+
+    if (temp > setTemp) {
+      fanState = true;
+    } else {
+      fanState = false;
+    }
+
+  }
+  //----------------------------------------------------
   LoRa.beginPacket();
   LoRa.print(String(des) + String(ipAddr));
   LoRa.print("T");
@@ -310,4 +328,3 @@ void sendUpdateData() {
 
   LoRa.endPacket();
 }
- 

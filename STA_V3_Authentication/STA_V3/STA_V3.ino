@@ -10,6 +10,9 @@
 const char* ssid = "ASUS";
 const char* password = "123456789";
 
+const char* http_username = "admin";
+const char* http_password = "admin";
+
 const char* ipAddr = "X0";
 String node1 = "X1";
 String node;
@@ -179,9 +182,18 @@ const char index_html[] PROGMEM = R"rawliteral(
     <a href="/M" class = "button "><i class="fas fa-sliders-h"></i>change mode</a>
     <a href="/setting" class = "button "><i class="fas fa-cog"></i>setting</a>
    </div>
+
+   <button onclick="logoutButton()">Logout</button>
    
 </body>
 <script>
+function logoutButton() {
+  var xhr = new XMLHttpRequest();
+  xhr.open("GET", "/logout", true);
+  xhr.send();
+  setTimeout(function(){ window.open("/logged-out","_self"); }, 1000);
+}
+
 setInterval(function ( ) {
   var xhttp = new XMLHttpRequest();
   xhttp.onreadystatechange = function() {
@@ -262,6 +274,18 @@ setInterval(function ( ) {
 </script>
 </html>)rawliteral";
 
+const char logout_html[] PROGMEM = R"rawliteral(
+<!DOCTYPE HTML><html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+  <p>Logged out or <a href="/">return to homepage</a>.</p>
+  <p><strong>Note:</strong> close all web browser tabs to complete the logout process.</p>
+</body>
+</html>
+)rawliteral";
+
 // Replaces placeholder with DHT values
 String processor(const String& var) {
   //Serial.println(var);
@@ -306,31 +330,49 @@ void setup() {
 
   // Route for root / web page
   server.on("/", HTTP_GET, [](AsyncWebServerRequest * request) {
+    if(!request->authenticate(http_username, http_password))
+      return request->requestAuthentication();
     request->send_P(200, "text/html", index_html, processor);
   });
   server.on("/temperature", HTTP_GET, [](AsyncWebServerRequest * request) {
+    if(!request->authenticate(http_username, http_password))
+      return request->requestAuthentication();
     request->send_P(200, "text/plain", handleTemperature().c_str());
   });
   server.on("/humidity", HTTP_GET, [](AsyncWebServerRequest * request) {
+    if(!request->authenticate(http_username, http_password))
+      return request->requestAuthentication();
     request->send_P(200, "text/plain", handleHumidity().c_str());
   });
   server.on("/humiditylimit", HTTP_GET, [](AsyncWebServerRequest * request) {
+    if(!request->authenticate(http_username, http_password))
+      return request->requestAuthentication();
     request->send_P(200, "text/plain", handleHumiditylimit().c_str());
   });
   server.on("/temperaturelimit", HTTP_GET, [](AsyncWebServerRequest * request) {
+    if(!request->authenticate(http_username, http_password))
+      return request->requestAuthentication();
     request->send_P(200, "text/plain", handleTemperaturelimit().c_str());
   });
   server.on("/pump", HTTP_GET, [](AsyncWebServerRequest * request) {
+    if(!request->authenticate(http_username, http_password))
+      return request->requestAuthentication();
     request->send_P(200, "text/plain", handlePump().c_str());
   });
   server.on("/fan", HTTP_GET, [](AsyncWebServerRequest * request) {
+    if(!request->authenticate(http_username, http_password))
+      return request->requestAuthentication();
     request->send_P(200, "text/plain", handleFan().c_str());
   });
   server.on("/mode", HTTP_GET, [](AsyncWebServerRequest * request) {
+    if(!request->authenticate(http_username, http_password))
+      return request->requestAuthentication();
     request->send_P(200, "text/plain", handleMode().c_str());
   });
 
   server.on("/M", HTTP_GET, [](AsyncWebServerRequest * request) {
+    if(!request->authenticate(http_username, http_password))
+      return request->requestAuthentication();
     loraSend(node1 + "M");
     request->send(200, "text/html", "<!DOCTYPE HTML><html><head>"
                   "<title>ESP Input Form</title>"
@@ -345,6 +387,8 @@ void setup() {
   });
 
   server.on("/P", HTTP_GET, [](AsyncWebServerRequest * request) {
+    if(!request->authenticate(http_username, http_password))
+      return request->requestAuthentication();
     loraSend(node1 + "P");
     request->send(200, "text/html", "<!DOCTYPE HTML><html><head>"
                   "<title>ESP Input Form</title>"
@@ -359,6 +403,8 @@ void setup() {
   });
 
   server.on("/setting", HTTP_GET, [](AsyncWebServerRequest * request) {
+    if(!request->authenticate(http_username, http_password))
+      return request->requestAuthentication();
     request->send(200, "text/html", "<!DOCTYPE HTML><html><head>"
                   "<title>ESP Input Form</title>"
                   "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">"
@@ -380,6 +426,8 @@ void setup() {
   });
 
   server.on("/F", HTTP_GET, [](AsyncWebServerRequest * request) {
+    if(!request->authenticate(http_username, http_password))
+      return request->requestAuthentication();
     loraSend(node1 + "F");
     request->send(200, "text/html", "<!DOCTYPE HTML><html><head>"
                   "<title>ESP Input Form</title>"
@@ -395,7 +443,8 @@ void setup() {
 
   // Send a GET request to <ESP_IP>/get?input1=<inputMessage>
   server.on("/get", HTTP_GET, [] (AsyncWebServerRequest * request) {
-
+      if(!request->authenticate(http_username, http_password))
+        return request->requestAuthentication();
     // GET input1 value on <ESP_IP>/get?input1=<inputMessage>
     if (request->hasParam(PARAM_INPUT_1)) {
       inputMessage = request->getParam(PARAM_INPUT_1)->value();
@@ -421,6 +470,14 @@ void setup() {
                   "<br><a href=\"/\">Return to Home Page</a>"
                   "<br><a href=\"/setting\">Return to setting page</a>");
 
+  });
+
+  server.on("/logout", HTTP_GET, [](AsyncWebServerRequest *request){
+    request->send(401);
+  });
+
+  server.on("/logged-out", HTTP_GET, [](AsyncWebServerRequest *request){
+    request->send_P(200, "text/html", logout_html, processor);
   });
 
   // Start server

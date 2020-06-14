@@ -288,6 +288,5 @@ void loop() {
   if (inputParam == "input2") {
     loraSend (node1 + "H" + inputMessage);
   }
-
   inputParam = "";
 }

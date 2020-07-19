@@ -5,6 +5,8 @@ VisualStudioVersion = 16.0.29728.190
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "WindowsApp2", "WindowsApp2\WindowsApp2.vbproj", "{28E0978E-85BC-424A-9186-CEC8C789E38D}"
 EndProject
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "Mushroom", "Mushroom\Mushroom.vdproj", "{B131D0EB-9CE7-4EA8-9239-A91E32587774}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{28E0978E-85BC-424A-9186-CEC8C789E38D}.Release|Any CPU.Build.0 = Release|Any CPU
 		{28E0978E-85BC-424A-9186-CEC8C789E38D}.Release|x86.ActiveCfg = Release|x86
 		{28E0978E-85BC-424A-9186-CEC8C789E38D}.Release|x86.Build.0 = Release|x86
+		{B131D0EB-9CE7-4EA8-9239-A91E32587774}.Debug|Any CPU.ActiveCfg = Debug
+		{B131D0EB-9CE7-4EA8-9239-A91E32587774}.Debug|x86.ActiveCfg = Debug
+		{B131D0EB-9CE7-4EA8-9239-A91E32587774}.Release|Any CPU.ActiveCfg = Release
+		{B131D0EB-9CE7-4EA8-9239-A91E32587774}.Release|x86.ActiveCfg = Release
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

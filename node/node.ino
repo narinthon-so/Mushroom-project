@@ -30,8 +30,8 @@ DHT dht(DHTPIN, DHTTYPE);
 unsigned long previousMillis = 0;
 const long interval = 1000;
 
-float temp;
-float humi;
+float temp, humi;
+float lasttemp, lasthumi;
 
 int setTemp;
 int setHumi;
@@ -52,6 +52,9 @@ void setup() {
   dht.begin();
   setTemp = EEPROM.read(0);
   setHumi = EEPROM.read(10);
+
+  //lasttemp = temp;
+  //lasthumi = humi;
 }
 
 void loop() {
@@ -71,6 +74,13 @@ void loop() {
 
   temp = dht.readTemperature();
   humi = dht.readHumidity();
+
+  /*if (temp != lasttemp) {
+    sendUpdateData();
+  }
+  if (humi != lasthumi) {
+    sendUpdateData();
+  }*/
 
   while (Serial.available()) { //Serial from VB
     char  i = Serial.read();
@@ -273,6 +283,9 @@ void loop() {
 
   digitalWrite(pump, pumpState);
   digitalWrite(fan, fanState);
+
+  //lasttemp = temp;
+  //lasthumi = humi;
 }
 
 void loraSend(String datasend) {

@@ -50,14 +50,14 @@ include 'connect.php';
     //echo $cerrent_date;
     //$sql = "SELECT id, temp, humi, save_time FROM SensorData ORDER BY save_time DESC LIMIT 24"; //ASC||DESC
     //defalt sql search by cerrent date
-    $sql = "SELECT id, temp, humi, save_time FROM SensorData WHERE save_time LIKE '" . $cerrent_date . "%' ";
+    $sql = "SELECT id, temp, humi, save_time FROM SensorData WHERE save_time LIKE '" . $cerrent_date . "%' ORDER BY save_time DESC";
 
     // Date filter
     if (isset($_POST['btn_search'])) {
         $searchDate = $_POST['searchDate'];
         //echo $searchDate;
         if (!empty($searchDate)) {
-            $sql = "SELECT id, temp, humi, save_time FROM SensorData WHERE save_time LIKE '" . $searchDate . "%' ";
+            $sql = "SELECT id, temp, humi, save_time FROM SensorData WHERE save_time LIKE '" . $searchDate . "%' ORDER BY save_time DESC";
         }
     }
 

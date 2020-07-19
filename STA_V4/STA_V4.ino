@@ -519,7 +519,7 @@ void insertDB() {
     //Serial.print("Error code: ");
     //Serial.println(httpResponseCode);
   }
-  NotifyLine("HTTP Response code: " + String(httpResponseCode) +"\nTemperature: " + String(temp) + " \nHumidity: " + String(humi));
+  NotifyLine("Saving Data into Database.\nHTTP Response code: " + String(httpResponseCode));
   // Free resources
   http.end();
 }
@@ -594,6 +594,7 @@ void setup() {
          line_notify_text += "Started Mushroom Web Server...\n";
          line_notify_text += "Local URL : " + WiFi.localIP().toString();
          line_notify_text += "\nPublic URL : " + web_server_url;
+         line_notify_text += "\nDatabase Server...\nURL : " + database_server_url;
   NotifyLine(line_notify_text);
 //--------------------------------------------------------------------
   // Route for root / web page

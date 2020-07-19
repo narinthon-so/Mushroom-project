@@ -1,8 +1,8 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 // Replace with your network credentials
-const char* ssid = "Router_2.4GHz"; //Router_2.4GHz  ASUS
-const char* password = "593321Ab";  //593321Ab       123456789
+const char* ssid = "ASUS"; //Router_2.4GHz  ASUS
+const char* password = "123456789";  //593321Ab       123456789
 
 //NTP variables
 const char* ntpServer = "pool.ntp.org";
@@ -10,7 +10,7 @@ const long  gmtOffset_sec = 21600;     //Thailand time zone
 const int   daylightOffset_sec = 3600;
 
 // variable for get ngrok public url
-const char* serverName = "http://192.168.1.26/public-url.php";
+const char* serverName = "http://192.168.43.181/public-url.php";
 
 // Keep this API Key value to be compatible with the PHP code provided in the project page.
 // If you change the apiKeyValue value, the PHP file /post-esp-data.php also needs to have the same key

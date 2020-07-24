@@ -4,7 +4,7 @@
     End Sub
 
     Private Sub Button1_Click(sender As Object, e As EventArgs) Handles Button1.Click
-        If TextBox1.Text = "test" And TextBox2.Text = "test" Then
+        If TextBox1.Text = "admin" And TextBox2.Text = "admin" Then
             Mushroom.Show()
             Me.Hide()
 

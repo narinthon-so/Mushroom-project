@@ -80,10 +80,10 @@ String handleTemperaturelimit() {
 String handlePump() {
   String pumpStateStr;
   if (pumpState == 1) {
-    pumpStateStr = "working";
+    pumpStateStr = "ON";
   }
   else {
-    pumpStateStr = "not work";
+    pumpStateStr = "OFF";
   }
   //Serial.println(pumpStateStr);
   return String(pumpStateStr);
@@ -92,10 +92,10 @@ String handlePump() {
 String handleFan() {
   String fanStateStr;
   if (fanState == 1) {
-    fanStateStr = "working";
+    fanStateStr = "ON";
   }
   else {
-    fanStateStr = "not work";
+    fanStateStr = "OFF";
   }
   //Serial.println(fanStateStr);
   return String(fanStateStr);
@@ -104,10 +104,10 @@ String handleFan() {
 String handleMode() {
   String ctrlModeStr;
   if (ctrlMode == 1) {
-    ctrlModeStr = "manual";
+    ctrlModeStr = "MANUAL";
   }
   else {
-    ctrlModeStr = "auto";
+    ctrlModeStr = "AUTO";
   }
   //Serial.println(ctrlModeStr);
   return String(ctrlModeStr);

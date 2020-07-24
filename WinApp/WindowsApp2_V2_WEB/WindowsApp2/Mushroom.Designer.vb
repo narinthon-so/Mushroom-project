@@ -188,20 +188,20 @@ Partial Class Mushroom
         Me.Label8.ForeColor = System.Drawing.Color.Lime
         Me.Label8.Location = New System.Drawing.Point(707, 247)
         Me.Label8.Name = "Label8"
-        Me.Label8.Size = New System.Drawing.Size(113, 32)
+        Me.Label8.Size = New System.Drawing.Size(57, 32)
         Me.Label8.TabIndex = 9
-        Me.Label8.Text = "working"
+        Me.Label8.Text = "ON"
         '
         'Label9
         '
         Me.Label9.AutoSize = True
         Me.Label9.Font = New System.Drawing.Font("Microsoft Sans Serif", 16.2!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.Label9.ForeColor = System.Drawing.Color.FromArgb(CType(CType(192, Byte), Integer), CType(CType(0, Byte), Integer), CType(CType(0, Byte), Integer))
-        Me.Label9.Location = New System.Drawing.Point(704, 313)
+        Me.Label9.Location = New System.Drawing.Point(714, 313)
         Me.Label9.Name = "Label9"
-        Me.Label9.Size = New System.Drawing.Size(160, 32)
+        Me.Label9.Size = New System.Drawing.Size(71, 32)
         Me.Label9.TabIndex = 10
-        Me.Label9.Text = "not working"
+        Me.Label9.Text = "OFF"
         '
         'Label10
         '
@@ -516,20 +516,20 @@ Partial Class Mushroom
         Me.Label26.ForeColor = System.Drawing.Color.Lime
         Me.Label26.Location = New System.Drawing.Point(707, 313)
         Me.Label26.Name = "Label26"
-        Me.Label26.Size = New System.Drawing.Size(113, 32)
+        Me.Label26.Size = New System.Drawing.Size(57, 32)
         Me.Label26.TabIndex = 31
-        Me.Label26.Text = "working"
+        Me.Label26.Text = "ON"
         '
         'Label27
         '
         Me.Label27.AutoSize = True
         Me.Label27.Font = New System.Drawing.Font("Microsoft Sans Serif", 16.2!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.Label27.ForeColor = System.Drawing.Color.FromArgb(CType(CType(192, Byte), Integer), CType(CType(0, Byte), Integer), CType(CType(0, Byte), Integer))
-        Me.Label27.Location = New System.Drawing.Point(707, 247)
+        Me.Label27.Location = New System.Drawing.Point(714, 247)
         Me.Label27.Name = "Label27"
-        Me.Label27.Size = New System.Drawing.Size(160, 32)
+        Me.Label27.Size = New System.Drawing.Size(71, 32)
         Me.Label27.TabIndex = 32
-        Me.Label27.Text = "not working"
+        Me.Label27.Text = "OFF"
         '
         'Label28
         '
@@ -644,13 +644,13 @@ Partial Class Mushroom
         '
         Me.SettingToolStripMenuItem.Image = CType(resources.GetObject("SettingToolStripMenuItem.Image"), System.Drawing.Image)
         Me.SettingToolStripMenuItem.Name = "SettingToolStripMenuItem"
-        Me.SettingToolStripMenuItem.Size = New System.Drawing.Size(224, 26)
+        Me.SettingToolStripMenuItem.Size = New System.Drawing.Size(166, 26)
         Me.SettingToolStripMenuItem.Text = "Config URL"
         '
         'CloseToolStripMenuItem
         '
         Me.CloseToolStripMenuItem.Name = "CloseToolStripMenuItem"
-        Me.CloseToolStripMenuItem.Size = New System.Drawing.Size(224, 26)
+        Me.CloseToolStripMenuItem.Size = New System.Drawing.Size(166, 26)
         Me.CloseToolStripMenuItem.Text = "Close"
         '
         'ViewToolStripMenuItem

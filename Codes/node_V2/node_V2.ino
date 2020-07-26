@@ -32,9 +32,8 @@ const long interval = 1000;
 
 float temp, humi;
 
-int setTemp;
-int setHumi;
-
+int set_temp_min, set_temp_max; /*T => set_temp_max*/ /*Y => set_temp_min*/
+int set_humi_min, set_humi_max; /*H => set_humi_min*/ /*J => set_humi_max*/
 
 void setup() {
 
@@ -49,11 +48,12 @@ void setup() {
   EEPROM.begin(EEPROM_SIZE);
   Serial.begin(115200);
   dht.begin();
-  setTemp = EEPROM.read(0);
-  setHumi = EEPROM.read(10);
 
-  //lasttemp = temp;
-  //lasthumi = humi;
+  set_temp_min = EEPROM.read(1);
+  set_temp_max = EEPROM.read(0);
+  set_humi_min = EEPROM.read(10);
+  set_humi_max = EEPROM.read(9);
+
 }
 
 void loop() {
@@ -74,42 +74,40 @@ void loop() {
   temp = dht.readTemperature();
   humi = dht.readHumidity();
 
-  /*if (temp != lasttemp) {
-    sendUpdateData();
-  }
-  if (humi != lasthumi) {
-    sendUpdateData();
-  }*/
-
+  //serial ----------------------------------------------------------------------
   while (Serial.available()) { //Serial from VB
     char  i = Serial.read();
     line += i;
   }
   String Head = line.substring(0, 1);
   dataVB = line.substring(1, 3).toInt();  // real da sub 3 time EX H20
-  // sub 4 time for EX H100
 
-  if (Head == "T") {
-    setTemp = dataVB;
-    EEPROM.write(0, setTemp);
+  if (Head == "Y") {
+    set_temp_min = dataVB;
+    EEPROM.write(1, set_temp_min);
+    EEPROM.commit();
+    sendUpdateData();
+    line = "";
+
+  } else if (Head == "T") {
+    set_temp_max = dataVB;
+    EEPROM.write(0, set_temp_max);
     EEPROM.commit();
     sendUpdateData();
     line = "";
 
   } else if (Head == "H") {
-    setHumi = dataVB;
-    EEPROM.write(10, setHumi);
+    set_humi_min = dataVB;
+    EEPROM.write(10, set_humi_min);
     EEPROM.commit();
     sendUpdateData();
     line = "";
-  } else if (Head == "R") {
-
-    /*   Serial.print("T");
-       Serial.print(EEPROM.read(0));
-       Serial.print("H");
-       Serial.print(EEPROM.read(10));
-    */
-
+  } else if (Head == "J") {
+    set_humi_max = dataVB;
+    EEPROM.write(9, set_humi_max);
+    EEPROM.commit();
+    sendUpdateData();
+    line = "";
   } else if (Head == "M") {
     if (ctrlMode == false) {
       ctrlMode = true;
@@ -142,7 +140,7 @@ void loop() {
 
 
 
-  //LoRa
+  //LoRa--------------------------------------------------------------
   if (LoRa.parsePacket()) {
     // received a packet
     // Serial.print("Received packet '");
@@ -162,15 +160,27 @@ void loop() {
           }
           sendUpdateData();
         }
+        else if (head == "Y") {
+          set_temp_min = dataLR;
+          EEPROM.write(1, set_temp_min);
+          EEPROM.commit();
+          sendUpdateData();
+        }
         else if (head == "T") {
-          setTemp = dataLR;
-          EEPROM.write(0, setTemp);
+          set_temp_max = dataLR;
+          EEPROM.write(0, set_temp_max);
           EEPROM.commit();
           sendUpdateData();
         }
         else if (head == "H") {
-          setHumi = dataLR;
-          EEPROM.write(10, setHumi);
+          set_humi_min = dataLR;
+          EEPROM.write(10, set_humi_min);
+          EEPROM.commit();
+          sendUpdateData();
+        }
+        else if (head == "J") {
+          set_humi_max = dataLR;
+          EEPROM.write(9, set_humi_max);
           EEPROM.commit();
           sendUpdateData();
         }
@@ -202,19 +212,25 @@ void loop() {
     // Serial.println(LoRa.packetRssi());
   }
 
-  //check mode
+  //check mode-------------------------------------------------------------
   if (ctrlMode == false) { // auto mode
 
-    if (humi < setHumi) {
+    if (humi < set_humi_min || humi > set_humi_max) {
       pumpState = true;
     } else {
       pumpState = false;
     }
 
-    if (temp > setTemp) {
-      fanState = true;
+    if (temp > set_temp_max) {
+      fanState = true; //ลดอุณหภูมิ
     } else {
       fanState = false;
+    }
+
+    if (temp < set_temp_min){
+      //เพิ่มอุณหภูมิ
+    } else{
+      //noting
     }
 
   }
@@ -251,7 +267,7 @@ void loop() {
 
   }
 
-  //print values to VB
+  //print data to VB-------------------------------------------------
   unsigned long currentMillis = millis();
   if (currentMillis - previousMillis >= interval) {
     previousMillis = currentMillis;
@@ -269,14 +285,16 @@ void loop() {
     } else {
       Serial.print(humi);
     }
-    Serial.print(setTemp);
-    Serial.print(setHumi);
+    Serial.print(set_temp_max);
+    Serial.print(set_humi_min);
     Serial.print("M");
     Serial.print(ctrlMode);
     Serial.print("P");
     Serial.print(pumpState);
     Serial.print("F");
     Serial.print(fanState);
+    Serial.print(set_temp_min);
+    Serial.print(set_humi_max);
     Serial.println();
   }
 
@@ -297,13 +315,13 @@ void sendUpdateData() { //this function will call when sumting change ...
   //change pumpState and fanState before sendUpdateData ***if not pumpState and fanState on webserver will not be real value
   if (ctrlMode == false) { // auto mode
 
-    if (humi < setHumi) {
+    if (humi < set_humi_min) {
       pumpState = true;
     } else {
       pumpState = false;
     }
 
-    if (temp > setTemp) {
+    if (temp > set_temp_max) {
       fanState = true;
     } else {
       fanState = false;
@@ -327,14 +345,15 @@ void sendUpdateData() { //this function will call when sumting change ...
   } else {
     LoRa.print(humi);
   }
-  LoRa.print(setTemp);
-  LoRa.print(setHumi);
+  LoRa.print(set_temp_max);
+  LoRa.print(set_humi_min);
   LoRa.print("M");
   LoRa.print(ctrlMode);
   LoRa.print("P");
   LoRa.print(pumpState);
   LoRa.print("F");
   LoRa.print(fanState);
-
+  LoRa.print(set_temp_min);
+  LoRa.print(set_humi_max);
   LoRa.endPacket();
 }

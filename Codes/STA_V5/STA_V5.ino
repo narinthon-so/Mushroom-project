@@ -26,8 +26,8 @@ String dataForVB;
 
 float temp;
 float humi;
-int setTemp;
-int setHumi;
+int set_temp_min, set_temp_max;
+int set_humi_min, set_humi_max;
 bool ctrlMode;
 bool pumpState;
 bool fanState;
@@ -64,19 +64,19 @@ String handleHumidity() {
   //Serial.println(h);
   return String(h);
 }
-
-String handleHumiditylimit() {
-  float sh = setHumi;
+//-------------------------------------------------edit
+String handleHumiditylimitMin() {
+  float sh = set_humi_min;
   //Serial.println(sh);
   return String(sh);
 }
 
-String handleTemperaturelimit() {
-  float st = setTemp;
+String handleTemperaturelimitMax() {
+  float st = set_temp_max;
   //Serial.println(st);
   return String(st);
 }
-
+//----------------------------------------------------
 String handlePump() {
   String pumpStateStr;
   if (pumpState == 1) {
@@ -263,10 +263,10 @@ const char index_html[] PROGMEM = R"rawliteral(
         var xhttp = new XMLHttpRequest();
         xhttp.onreadystatechange = function () {
             if (this.readyState == 4 && this.status == 200) {
-                document.getElementById("temperaturelimit").innerHTML = this.responseText;
+                document.getElementById("temperaturelimitmax").innerHTML = this.responseText;
             }
         };
-        xhttp.open("GET", "/temperaturelimit", true);
+        xhttp.open("GET", "/temperaturelimitmax", true);
         xhttp.send();
     }, 5000);
 
@@ -285,10 +285,10 @@ const char index_html[] PROGMEM = R"rawliteral(
         var xhttp = new XMLHttpRequest();
         xhttp.onreadystatechange = function () {
             if (this.readyState == 4 && this.status == 200) {
-                document.getElementById("humiditylimit").innerHTML = this.responseText;
+                document.getElementById("humiditylimitmin").innerHTML = this.responseText;
             }
         };
-        xhttp.open("GET", "/humiditylimit", true);
+        xhttp.open("GET", "/humiditylimitmin", true);
         xhttp.send();
     }, 5000);
 
@@ -381,7 +381,7 @@ const char index_html[] PROGMEM = R"rawliteral(
         <span id="temperature">%TEMPERATURE%</span>
         <sup class="units" style="font-weight:bold; font-size:1.5rem;">&deg;C</sup>
         <span class="labels">Temp Limit</span>
-        <span id="temperaturelimit">%TEMPERATURELIMIT%</span>
+        <span id="temperaturelimitmax">%TEMPERATURELIMITMAX%</span>
         <sup class="units" style="font-weight:bold; font-size:1.5rem;">&deg;C</sup>
     </div>
 
@@ -391,7 +391,7 @@ const char index_html[] PROGMEM = R"rawliteral(
         <span id="humidity">%HUMIDITY%</span>
         <sup class="units"><i class="fas fa-percent"></i></sup>
         <span class="labels">Humi Limit</span>
-        <span id="humiditylimit">%HUMIDITYLIMIT%</span>
+        <span id="humiditylimitmin">%HUMIDITYLIMITMIN%</span>
         <sup class="units"><i class="fas fa-percent"></i></sup>
     </div>
 
@@ -444,11 +444,11 @@ String processor(const String& var) {
   else if (var == "HUMIDITY") {
     return handleHumidity();
   }
-  else if (var == "HUMIDITYLIMIT") {
-    return handleHumiditylimit();
+  else if (var == "HUMIDITYLIMITMIN") {
+    return handleHumiditylimitMin();
   }
-  else if (var == "TEMPERATURELIMIT") {
-    return handleTemperaturelimit();
+  else if (var == "TEMPERATURELIMITMAX") {
+    return handleTemperaturelimitMax();
   }
   else if (var == "PUMP") {
     return handlePump();
@@ -488,8 +488,8 @@ void insertDB() {
   }
   // Prepare your HTTP POST request data
   String httpRequestData = "api_key=" + apiKeyValue + "&temp=" + String(temp)
-                           + "&humi=" + String(humi) + "&temp_limit=" + String(setTemp)
-                           + "&humi_limit=" + String(setHumi) + "&ctrl_mode=" + ctrlModeStr
+                           + "&humi=" + String(humi) + "&temp_limit=" + String(set_temp_max)
+                           + "&humi_limit=" + String(set_humi_min) + "&ctrl_mode=" + ctrlModeStr
                            + "&pump_state=" + pumpStateStr + "&fan_state=" + fanStateStr + "";
 
 
@@ -613,16 +613,18 @@ void setup() {
       return request->requestAuthentication();
     request->send_P(200, "text/plain", handleHumidity().c_str());
   });
-  server.on("/humiditylimit", HTTP_GET, [](AsyncWebServerRequest * request) {
+//------------------------------------------------------------------------------edit
+  server.on("/humiditylimitmin", HTTP_GET, [](AsyncWebServerRequest * request) {
     if(!request->authenticate(http_username, http_password))
       return request->requestAuthentication();
-    request->send_P(200, "text/plain", handleHumiditylimit().c_str());
+    request->send_P(200, "text/plain", handleHumiditylimitMin().c_str());
   });
-  server.on("/temperaturelimit", HTTP_GET, [](AsyncWebServerRequest * request) {
+  server.on("/temperaturelimitmax", HTTP_GET, [](AsyncWebServerRequest * request) {
     if(!request->authenticate(http_username, http_password))
       return request->requestAuthentication();
-    request->send_P(200, "text/plain", handleTemperaturelimit().c_str());
+    request->send_P(200, "text/plain", handleTemperaturelimitMax().c_str());
   });
+//-------------------------------------------------------------------------------
   server.on("/pump", HTTP_GET, [](AsyncWebServerRequest * request) {
     if(!request->authenticate(http_username, http_password))
       return request->requestAuthentication();
@@ -800,7 +802,7 @@ void loop(void) {
     while (LoRa.available()) {
       if (LoRa.find(ipAddr)) { // ip address this device "
         x = LoRa.readString();
-        dataForVB = x.substring(2, 24);
+        dataForVB = x.substring(2, 28);
         Serial.println(dataForVB);
       }
     }
@@ -809,11 +811,13 @@ void loop(void) {
   if (node == "X1") {
     temp = x.substring(3, 8).toFloat();
     humi = x.substring(9, 14).toFloat();
-    setTemp = x.substring(14, 16).toInt();
-    setHumi = x.substring(16, 18).toInt();
+    set_temp_max = x.substring(14, 16).toInt();
+    set_humi_min = x.substring(16, 18).toInt();
     ctrlMode = x.substring(19, 20).toInt();
     pumpState = x.substring(21, 22).toInt();
     fanState = x.substring(23, 24).toInt();
+    set_temp_min = x.substring(24, 26).toInt();
+    set_humi_max = x.substring(26, 28).toInt();
   }
   //for request data via lora every 30s
   if (currentMillis - previousMillis_request >= interval_request) {

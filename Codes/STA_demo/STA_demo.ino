@@ -618,7 +618,7 @@ void insertDB()
     fanStateStr = "OFF";
   }
   // Prepare your HTTP POST request data
-  String httpRequestData = "api_key=" + apiKeyValue + "&temp=" + String(temp) + "&humi=" + String(humi) + "&temp_limit=" + String(set_temp_max) + "&humi_limit=" + String(set_humi_min) + "&ctrl_mode=" + ctrlModeStr + "&pump_state=" + pumpStateStr + "&fan_state=" + fanStateStr + "";
+  String httpRequestData = "api_key=" + apiKeyValue + "&temp=" + String(temp) + "&humi=" + String(humi) + "&temp_limit_min=" + String(set_temp_min) + "&temp_limit_max=" + String(set_temp_max) + "&humi_limit_min=" + String(set_humi_min) + "&humi_limit_max=" + String(set_humi_max) + "&ctrl_mode=" + ctrlModeStr + "&pump_state=" + pumpStateStr + "&fan_state=" + fanStateStr + "";
 
   //Serial.print("httpRequestData: ");
   //Serial.println(httpRequestData);
@@ -660,6 +660,10 @@ void setup()
   Heltec.begin(false /*DisplayEnable Enable*/, true /*Heltec.LoRa Disable*/, true /*Serial Enable*/, true /*PABOOST Enable*/, BAND /*long BAND*/);
   pinMode(led_check_wifi_status, OUTPUT);
   digitalWrite(led_check_wifi_status, LOW);
+  // Configures static IP address
+  if (!WiFi.config(local_IP, gateway, subnet, primaryDNS, secondaryDNS)) {
+    Serial.println("STA Failed to configure");
+  }
   // Connect to Wi-Fi
   WiFi.begin(ssid, password);
   while (WiFi.status() != WL_CONNECTED)
@@ -1093,10 +1097,10 @@ void NotifyLine(String t)
   req += "Content-Length: " + String(String("message=" + t).length()) + "\r\n";
   req += "\r\n";
   req += "message=" + t;
-  Serial.println(req);
+  //Serial.println(req);
   client.print(req);
   delay(20);
-  Serial.println("-------------");
+  //Serial.println("-------------");
   while (client.connected())
   {
     String line = client.readStringUntil('\n');

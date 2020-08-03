@@ -7,7 +7,7 @@ const char* password = "123456789";  //593321Ab       123456789
 // Set your Static IP address
 IPAddress local_IP(192, 168, 43, 100);
 // Set your Gateway IP address
-IPAddress gateway(192, 168, 43, 202);
+IPAddress gateway(192, 168, 43, 235);
 
 IPAddress subnet(255, 255, 255, 0);
 IPAddress primaryDNS(8, 8, 8, 8);   //optional

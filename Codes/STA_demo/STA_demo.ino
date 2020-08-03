@@ -150,6 +150,7 @@ const char index_html[] PROGMEM = R"rawliteral(
 <!DOCTYPE HTML><html>
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mushroom Web Server</title>
   <script src="https://kit.fontawesome.com/43df6e3879.js" crossorigin="anonymous"></script>
      <style>
         html {
@@ -281,7 +282,36 @@ const char index_html[] PROGMEM = R"rawliteral(
         xhr.send();
         setTimeout(function () { window.open("/logged-out", "_self"); }, 1000);
     }
-
+    function getpump() {
+        var xhttp = new XMLHttpRequest();
+          xhttp.onreadystatechange = function () {
+            if (this.readyState == 4 && this.status == 200) {
+                alert(this.responseText);
+            }
+        };
+          xhttp.open("GET", "/P", true);
+          xhttp.send();
+    }
+    function getfan() {
+        var xhttp = new XMLHttpRequest();
+          xhttp.onreadystatechange = function () {
+            if (this.readyState == 4 && this.status == 200) {
+                alert(this.responseText);
+            }
+        };
+          xhttp.open("GET", "/F", true);
+          xhttp.send();
+    }
+    function getmode() {
+        var xhttp = new XMLHttpRequest();
+          xhttp.onreadystatechange = function () {
+            if (this.readyState == 4 && this.status == 200) {
+                alert(this.responseText);
+            }
+        };
+          xhttp.open("GET", "/M", true);
+          xhttp.send();
+    }
     setInterval(function () {
         var xhttp = new XMLHttpRequest();
         xhttp.onreadystatechange = function () {
@@ -415,7 +445,7 @@ const char index_html[] PROGMEM = R"rawliteral(
           xhttp.open("GET", "/phpmyadmin", true);
           xhttp.send();
         }
-        
+
     </script>
 
     <div id="mySidenav" class="sidenav" style="text-align: left;">
@@ -480,9 +510,9 @@ const char index_html[] PROGMEM = R"rawliteral(
     </div>
 
     <div style="padding-top: 25px;">
-        <a href="/P" class="button button2"><i class="fas fa-shower"></i>&nbsp;pump on/off</a>
-        <a href="/F" class="button button2"><i class="fas fa-fan"></i>&nbsp;fan on/off</a>
-        <a href="/M" class="button button3"><i class="fas fa-sliders-h"></i>&nbsp;change mode</a>
+        <a href="#" onclick="getpump()" class="button button2"><i class="fas fa-shower"></i>&nbsp;pump on/off</a>
+        <a href="#" onclick="getfan()" class="button button2"><i class="fas fa-fan"></i>&nbsp;fan on/off</a>
+        <a href="#" onclick="getmode()" class="button button3"><i class="fas fa-sliders-h"></i>&nbsp;change mode</a>
     </div>
 
 </body>
@@ -816,15 +846,7 @@ void setup()
       return request->requestAuthentication();
     lora_ctrl_mode = true;
     //loraSend(node1 + "M");
-    request->send(200, "text/html", "<!DOCTYPE HTML><html><head>"
-                                    "<title>ESP Input Form</title>"
-                                    "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">"
-                                    "<style>body{text-align:center;}"
-                                    "</style>"
-                                    "</head><body>"
-                                    "<p>sending command via lora to mushroom node...</p>"
-                                    "<br><a href=\"/\">Return to Home Page</a>"
-                                    "</body></html>");
+    request->send(200, "text/html", "sending command via lora to mushroom node...");                                   
   });
 
   server.on("/P", HTTP_GET, [](AsyncWebServerRequest *request) {
@@ -832,15 +854,7 @@ void setup()
       return request->requestAuthentication();
     lora_ctrl_pump = true;
     //loraSend(node1 + "P");
-    request->send(200, "text/html", "<!DOCTYPE HTML><html><head>"
-                                    "<title>ESP Input Form</title>"
-                                    "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">"
-                                    "<style>body{text-align:center;}"
-                                    "</style>"
-                                    "</head><body>"
-                                    "<p>sending command via lora to mushroom node...</p>"
-                                    "<br><a href=\"/\">Return to Home Page</a>"
-                                    "</body></html>");
+    request->send(200, "text/html", "sending command via lora to mushroom node...");
   });
 
   server.on("/setting", HTTP_GET, [](AsyncWebServerRequest *request) {
@@ -854,15 +868,7 @@ void setup()
       return request->requestAuthentication();
     lora_ctrl_fan = true;
     //loraSend(node1 + "F");
-    request->send(200, "text/html", "<!DOCTYPE HTML><html><head>"
-                                    "<title>ESP Input Form</title>"
-                                    "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">"
-                                    "<style>body{text-align:center;}"
-                                    "</style>"
-                                    "</head><body>"
-                                    "<p>sending command via lora to mushroom node...</p>"
-                                    "<br><a href=\"/\">Return to Home Page</a>"
-                                    "</body></html>");
+    request->send(200, "text/html", "sending command via lora to mushroom node...");
   });
 
   // Send a GET request to <ESP_IP>/get?input1=<inputMessage>

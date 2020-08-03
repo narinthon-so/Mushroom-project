@@ -215,10 +215,16 @@ void loop() {
   //check mode-------------------------------------------------------------
   if (ctrlMode == false) { // auto mode
 
-    if (humi < set_humi_min || humi > set_humi_max) {
+    if (humi < set_humi_min) {
       pumpState = true;
     } else {
       pumpState = false;
+    }
+
+    if (humi > set_humi_max) {
+      pumpState = false;
+    } else {
+      pumpState = true;
     }
 
     if (temp > set_temp_max) {
@@ -227,9 +233,9 @@ void loop() {
       fanState = false;
     }
 
-    if (temp < set_temp_min){
+    if (temp < set_temp_min) {
       //เพิ่มอุณหภูมิ
-    } else{
+    } else {
       //noting
     }
 
@@ -321,10 +327,22 @@ void sendUpdateData() { //this function will call when sumting change ...
       pumpState = false;
     }
 
+    if (humi > set_humi_max) {
+      pumpState = false;
+    } else {
+      pumpState = true;
+    }
+
     if (temp > set_temp_max) {
-      fanState = true;
+      fanState = true; //ลดอุณหภูมิ
     } else {
       fanState = false;
+    }
+
+    if (temp < set_temp_min) {
+      //เพิ่มอุณหภูมิ
+    } else {
+      //noting
     }
 
   }

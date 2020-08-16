@@ -439,4 +439,9 @@ Public Class Mushroom
 
         End If
     End Sub
+
+    Private Sub LogoutToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles LogoutToolStripMenuItem.Click
+        Login.Show()
+        Me.Close()
+    End Sub
 End Class

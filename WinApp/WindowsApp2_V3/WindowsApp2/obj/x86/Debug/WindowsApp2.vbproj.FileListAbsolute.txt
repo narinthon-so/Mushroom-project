@@ -27,7 +27,6 @@ D:\Works\HardwareTopic\Mushroom\WinApp\WindowsApp2_V3\WindowsApp2\bin\x86\Debug\
 D:\Works\HardwareTopic\Mushroom\WinApp\WindowsApp2_V3\WindowsApp2\bin\x86\Debug\Mushroom.exe
 D:\Works\HardwareTopic\Mushroom\WinApp\WindowsApp2_V3\WindowsApp2\bin\x86\Debug\Mushroom.pdb
 D:\Works\HardwareTopic\Mushroom\WinApp\WindowsApp2_V3\WindowsApp2\bin\x86\Debug\Mushroom.xml
-D:\Works\HardwareTopic\Mushroom\WinApp\WindowsApp2_V3\WindowsApp2\obj\x86\Debug\WindowsApp2.vbprojAssemblyReference.cache
 D:\Works\HardwareTopic\Mushroom\WinApp\WindowsApp2_V3\WindowsApp2\obj\x86\Debug\WindowsApp2.ConfigURL.resources
 D:\Works\HardwareTopic\Mushroom\WinApp\WindowsApp2_V3\WindowsApp2\obj\x86\Debug\WindowsApp2.Login.resources
 D:\Works\HardwareTopic\Mushroom\WinApp\WindowsApp2_V3\WindowsApp2\obj\x86\Debug\WindowsApp2.Mushroom.resources

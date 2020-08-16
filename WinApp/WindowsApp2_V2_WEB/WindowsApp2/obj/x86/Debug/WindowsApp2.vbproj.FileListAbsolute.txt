@@ -23,3 +23,4 @@ D:\Works\HardwareTopic\Mushroom\WinApp\WindowsApp2_V2_WEB\WindowsApp2\obj\x86\De
 D:\Works\HardwareTopic\Mushroom\WinApp\WindowsApp2_V2_WEB\WindowsApp2\obj\x86\Debug\Mushroom.exe
 D:\Works\HardwareTopic\Mushroom\WinApp\WindowsApp2_V2_WEB\WindowsApp2\obj\x86\Debug\Mushroom.xml
 D:\Works\HardwareTopic\Mushroom\WinApp\WindowsApp2_V2_WEB\WindowsApp2\obj\x86\Debug\Mushroom.pdb
+D:\Works\HardwareTopic\Mushroom\WinApp\WindowsApp2_V2_WEB\WindowsApp2\obj\x86\Debug\WindowsApp2.vbprojAssemblyReference.cache

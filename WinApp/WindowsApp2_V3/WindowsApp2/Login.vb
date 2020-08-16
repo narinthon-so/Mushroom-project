@@ -7,9 +7,10 @@
         If TextBox1.Text = "admin" And TextBox2.Text = "admin" Then
             Mushroom.Show()
             Me.Hide()
-
+            TextBox1.Clear()
+            TextBox2.Clear()
         Else
-            MsgBox("Sorry, The Username or Password was incorrect.", MsgBoxStyle.Critical, "Information")
+            MsgBox("Sorry, The Username or Password was incorrect.", MsgBoxStyle.Critical, "Error")
         End If
     End Sub
 End Class

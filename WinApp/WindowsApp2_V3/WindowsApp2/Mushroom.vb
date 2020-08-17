@@ -142,7 +142,7 @@ Public Class Mushroom
             Label36.Text = set_humi_max
 
         Catch ex As Exception
-            MessageBox.Show("Error, Serial data.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
+            'MessageBox.Show("Error, Serial data.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
         End Try
 
 

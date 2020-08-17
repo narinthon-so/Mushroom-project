@@ -2,6 +2,10 @@
 
 #include "heltec.h"
 #include <EEPROM.h>
+#include <Wire.h>
+#include <LiquidCrystal_I2C.h>
+
+LiquidCrystal_I2C lcd(0x27, 16, 2);
 
 #define EEPROM_SIZE 512
 #define BAND    433E6  //you can set band here directly,e.g. 868E6,915E6
@@ -48,6 +52,9 @@ void setup() {
   EEPROM.begin(EEPROM_SIZE);
   Serial.begin(115200);
   dht.begin();
+
+  lcd.begin();                      // initialize the lcd
+  //lcd.backlight();
 
   set_temp_min = EEPROM.read(1);
   set_temp_max = EEPROM.read(0);
@@ -278,27 +285,49 @@ void loop() {
   if (currentMillis - previousMillis >= interval) {
     previousMillis = currentMillis;
     Serial.print("T");
+    lcd.setCursor(0, 0);
+    lcd.print("T:");
     if (temp < 10.00) {
       String tempStr = "0" + String(temp);
       Serial.print(tempStr);
+      lcd.print(tempStr);
     } else {
       Serial.print(temp);
+      lcd.print(temp);
     }
     Serial.print("H");
+    lcd.setCursor(0, 1);
+    lcd.print("H:");
     if (humi < 10.00) {
       String humiStr = "0" + String(humi);
       Serial.print(humiStr);
+      lcd.print(humiStr);
     } else {
       Serial.print(humi);
+      lcd.print(humi);
     }
     Serial.print(set_temp_max);
     Serial.print(set_humi_min);
     Serial.print("M");
+    lcd.setCursor(12, 0);
+    lcd.print("MODE");
     Serial.print(ctrlMode);
+    lcd.setCursor(12, 1);
+    if (ctrlMode) {
+      lcd.print("MAN ");
+    } else {
+      lcd.print("AUTO");
+    }
     Serial.print("P");
+    lcd.setCursor(8, 0);
+    lcd.print("P:");
     Serial.print(pumpState);
+    lcd.print(pumpState);
     Serial.print("F");
+    lcd.setCursor(8, 1);
+    lcd.print("F:");
     Serial.print(fanState);
+    lcd.print(fanState);
     Serial.print(set_temp_min);
     Serial.print(set_humi_max);
     Serial.println();

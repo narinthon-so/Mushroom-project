@@ -36,7 +36,7 @@ String line = "";
 
 String inputMessage;
 String inputParam;
-bool lora_ctrl_pump, lora_ctrl_fan, lora_ctrl_mode;
+bool lora_ctrl_pump, lora_ctrl_fan, lora_ctrl_mode, lora_request_update;
 
 const char *PARAM_INPUT_1 = "input1"; //temp Max
 const char *PARAM_INPUT_3 = "input3"; //temp Min
@@ -164,7 +164,7 @@ const char index_html[] PROGMEM = R"rawliteral(
             font-size: 36px;
             margin-left: 50px;
         }
-
+        
         @media screen and (max-height: 450px) {
             .sidenav {
                 padding-top: 15px;
@@ -209,6 +209,18 @@ const char index_html[] PROGMEM = R"rawliteral(
           xhttp.open("GET", "/M", true);
           xhttp.send();
     }
+
+    function requestupdate() {
+        var xhttp = new XMLHttpRequest();
+          xhttp.onreadystatechange = function () {
+            if (this.readyState == 4 && this.status == 200) {
+                alert(this.responseText);
+            }
+        };
+          xhttp.open("GET", "/requestupdate", true);
+          xhttp.send();
+    }
+    
     
     function toggleCheckbox_pump(element) {
       var xhr = new XMLHttpRequest();
@@ -456,10 +468,13 @@ const char index_html[] PROGMEM = R"rawliteral(
 
     <div style="padding-top: 25px;">
         <a href="#" onclick="getmode()" class="button button3"><i class="fas fa-sliders-h"></i>&nbsp;change mode</a>
+        <a href="#" onclick="requestupdate()" class="button button2"><i class="fa fa-refresh" aria-hidden="true"></i>&nbsp;request update</a>
     </div>
-    
-    <div id="ctrlbtn_pump">%BUTTONPLACEHOLDERPUMP%</div>
-    <div id="ctrlbtn_fan">%BUTTONPLACEHOLDERFAN%</div>
+
+    <div style="padding-bottom: 25px;">
+        <a id="ctrlbtn_pump">%BUTTONPLACEHOLDERPUMP%</a>
+        <a id="ctrlbtn_fan">%BUTTONPLACEHOLDERFAN%</a>
+    </div>
   
 </body>
 
@@ -1016,6 +1031,14 @@ void setup()
     request->send(200, "text/html", "sending command via lora to mushroom node...");                                   
   });
 
+  server.on("/requestupdate", HTTP_GET, [](AsyncWebServerRequest *request) {
+    if (!request->authenticate(http_username, http_password))
+      return request->requestAuthentication();
+    lora_request_update = true;
+    //loraSend(node1 + "R");
+    request->send(200, "text/html", "sending command via lora to mushroom node...");                                   
+  });
+
   server.on("/P", HTTP_GET, [](AsyncWebServerRequest *request) {
     if (!request->authenticate(http_username, http_password))
       return request->requestAuthentication();
@@ -1209,6 +1232,11 @@ void loop(void)
   {
     loraSend(node1 + "F");
     lora_ctrl_fan = false;
+  }
+  if (lora_request_update == true)
+  {
+    loraSend(node1 + "R");
+    lora_request_update = false;
   }
   if (inputParam == "input1")
   {

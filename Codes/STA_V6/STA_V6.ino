@@ -43,8 +43,6 @@ const char *PARAM_INPUT_3 = "input3"; //temp Min
 const char *PARAM_INPUT_2 = "input2"; //humi Min
 const char *PARAM_INPUT_4 = "input4"; //humi Max
 
-//const char *_PARAM_INPUT_1 = "output";
-//const char *_PARAM_INPUT_2 = "state";
 //Timer-------------------------------------------------------------------------------
 unsigned long previousMillis_request = 0;
 unsigned long previousMillis_vb = 0;
@@ -56,6 +54,97 @@ const int interval_vb = 1000;       //Interval for print data to VB(Windows App)
 // Create AsyncWebServer object on port 80
 AsyncWebServer server(80);
 HTTPClient http;
+
+String handleTemperature()
+{
+  float t = temp;
+  //Serial.println(t);
+  return String(t);
+}
+
+String handleHumidity()
+{
+  float h = humi;
+  //Serial.println(h);
+  return String(h);
+}
+//-------------------------------------------------edit
+String handleHumiditylimitMin()
+{
+  float sh = set_humi_min;
+  //Serial.println(sh);
+  return String(sh);
+}
+String handleHumiditylimitMax()
+{
+  float sh = set_humi_max;
+  //Serial.println(sh);
+  return String(sh);
+}
+String handleTemperaturelimitMin()
+{
+  float st = set_temp_min;
+  //Serial.println(st);
+  return String(st);
+}
+String handleTemperaturelimitMax()
+{
+  float st = set_temp_max;
+  //Serial.println(st);
+  return String(st);
+}
+//----------------------------------------------------
+String handlePump()
+{
+  String pumpStateStr;
+  if (pumpState == 1)
+  {
+    pumpStateStr = "ON";
+  }
+  else
+  {
+    pumpStateStr = "OFF";
+  }
+  //Serial.println(pumpStateStr);
+  return String(pumpStateStr);
+}
+
+String handleFan()
+{
+  String fanStateStr;
+  if (fanState == 1)
+  {
+    fanStateStr = "ON";
+  }
+  else
+  {
+    fanStateStr = "OFF";
+  }
+  //Serial.println(fanStateStr);
+  return String(fanStateStr);
+}
+
+String handleMode()
+{
+  String ctrlModeStr;
+  if (ctrlMode == 1)
+  {
+    ctrlModeStr = "MANUAL";
+  }
+  else
+  {
+    ctrlModeStr = "AUTO";
+  }
+  //Serial.println(ctrlModeStr);
+  return String(ctrlModeStr);
+}
+
+void loraSend(String datasend)
+{
+  LoRa.beginPacket();
+  LoRa.print(datasend);
+  LoRa.endPacket();
+}
 
 const char index_html[] PROGMEM = R"rawliteral(
 <!DOCTYPE HTML><html>
@@ -69,6 +158,7 @@ const char index_html[] PROGMEM = R"rawliteral(
             display: inline-block;
             margin: 0px auto;
             text-align: center;
+            min-width: 400px;
         }
 
         h2 {
@@ -174,13 +264,7 @@ const char index_html[] PROGMEM = R"rawliteral(
                 font-size: 18px;
             }
         }
-        .switch {position: relative; display: inline-block; width: 120px; height: 68px} 
-        .switch input {display: none}
-        .slider {position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; border-radius: 6px}
-        .slider:before {position: absolute; content: ""; height: 52px; width: 52px; left: 8px; bottom: 8px; background-color: #fff; -webkit-transition: .4s; transition: .4s; border-radius: 3px}
-        input:checked+.slider {background-color: #b30000}
-        input:checked+.slider:before {-webkit-transform: translateX(52px); -ms-transform: translateX(52px); transform: translateX(52px)}
-  
+
     </style>
 </head>
 <script>
@@ -198,7 +282,26 @@ const char index_html[] PROGMEM = R"rawliteral(
         xhr.send();
         setTimeout(function () { window.open("/logged-out", "_self"); }, 1000);
     }
-
+    function getpump() {
+        var xhttp = new XMLHttpRequest();
+          xhttp.onreadystatechange = function () {
+            if (this.readyState == 4 && this.status == 200) {
+                alert(this.responseText);
+            }
+        };
+          xhttp.open("GET", "/P", true);
+          xhttp.send();
+    }
+    function getfan() {
+        var xhttp = new XMLHttpRequest();
+          xhttp.onreadystatechange = function () {
+            if (this.readyState == 4 && this.status == 200) {
+                alert(this.responseText);
+            }
+        };
+          xhttp.open("GET", "/F", true);
+          xhttp.send();
+    }
     function getmode() {
         var xhttp = new XMLHttpRequest();
           xhttp.onreadystatechange = function () {
@@ -209,31 +312,6 @@ const char index_html[] PROGMEM = R"rawliteral(
           xhttp.open("GET", "/M", true);
           xhttp.send();
     }
-    
-    function toggleCheckbox_pump(element) {
-      var xhr = new XMLHttpRequest();
-          xhr.onreadystatechange = function () {
-            if (this.readyState == 4 && this.status == 200) {
-                alert(this.responseText);
-            }
-        };
-        if(element.checked){ xhr.open("GET", "/P", true); }
-        else { xhr.open("GET", "/P", true); }
-        xhr.send();
-    }
-
-    function toggleCheckbox_fan(element) {
-      var xhr = new XMLHttpRequest();
-          xhr.onreadystatechange = function () {
-            if (this.readyState == 4 && this.status == 200) {
-                alert(this.responseText);
-            }
-        };
-        if(element.checked){ xhr.open("GET", "/F", true); }
-        else { xhr.open("GET", "/F", true); }
-        xhr.send();
-    }
-    
     setInterval(function () {
         var xhttp = new XMLHttpRequest();
         xhttp.onreadystatechange = function () {
@@ -242,28 +320,6 @@ const char index_html[] PROGMEM = R"rawliteral(
             }
         };
         xhttp.open("GET", "/temperature", true);
-        xhttp.send();
-    }, 5000);
-    
-    setInterval(function () {
-        var xhttp = new XMLHttpRequest();
-        xhttp.onreadystatechange = function () {
-            if (this.readyState == 4 && this.status == 200) {
-                document.getElementById("ctrlbtn_pump").innerHTML = this.responseText;
-            }
-        };
-        xhttp.open("GET", "/ctrlbtn_pump", true);
-        xhttp.send();
-    }, 5000);
-
-    setInterval(function () {
-        var xhttp = new XMLHttpRequest();
-        xhttp.onreadystatechange = function () {
-            if (this.readyState == 4 && this.status == 200) {
-                document.getElementById("ctrlbtn_fan").innerHTML = this.responseText;
-            }
-        };
-        xhttp.open("GET", "/ctrlbtn_fan", true);
         xhttp.send();
     }, 5000);
     
@@ -354,8 +410,7 @@ const char index_html[] PROGMEM = R"rawliteral(
         xhttp.open("GET", "/mode", true);
         xhttp.send();
     }, 5000);
-     
-</script>
+
 </script>
 <body>
     <script language="javascript" type="text/javascript">
@@ -455,12 +510,11 @@ const char index_html[] PROGMEM = R"rawliteral(
     </div>
 
     <div style="padding-top: 25px;">
+        <a href="#" onclick="getpump()" class="button button2"><i class="fas fa-shower"></i>&nbsp;pump on/off</a>
+        <a href="#" onclick="getfan()" class="button button2"><i class="fas fa-fan"></i>&nbsp;fan on/off</a>
         <a href="#" onclick="getmode()" class="button button3"><i class="fas fa-sliders-h"></i>&nbsp;change mode</a>
     </div>
-    
-    <div id="ctrlbtn_pump">%BUTTONPLACEHOLDERPUMP%</div>
-    <div id="ctrlbtn_fan">%BUTTONPLACEHOLDERFAN%</div>
-  
+
 </body>
 
 </html>)rawliteral";
@@ -516,134 +570,6 @@ const char setting_html[] PROGMEM = R"rawliteral(
 
 </html>
 )rawliteral";
-
-String handleTemperature()
-{
-  float t = temp;
-  //Serial.println(t);
-  return String(t);
-}
-
-String handleHumidity()
-{
-  float h = humi;
-  //Serial.println(h);
-  return String(h);
-}
-//-------------------------------------------------edit
-String handleHumiditylimitMin()
-{
-  float sh = set_humi_min;
-  //Serial.println(sh);
-  return String(sh);
-}
-String handleHumiditylimitMax()
-{
-  float sh = set_humi_max;
-  //Serial.println(sh);
-  return String(sh);
-}
-String handleTemperaturelimitMin()
-{
-  float st = set_temp_min;
-  //Serial.println(st);
-  return String(st);
-}
-String handleTemperaturelimitMax()
-{
-  float st = set_temp_max;
-  //Serial.println(st);
-  return String(st);
-}
-//----------------------------------------------------
-String handlePump()
-{
-  String pumpStateStr;
-  if (pumpState == 1)
-  {
-    pumpStateStr = "ON";
-  }
-  else
-  {
-    pumpStateStr = "OFF";
-  }
-  //Serial.println(pumpStateStr);
-  return String(pumpStateStr);
-}
-
-String handleFan()
-{
-  String fanStateStr;
-  if (fanState == 1)
-  {
-    fanStateStr = "ON";
-  }
-  else
-  {
-    fanStateStr = "OFF";
-  }
-  //Serial.println(fanStateStr);
-  return String(fanStateStr);
-}
-
-String handleMode()
-{
-  String ctrlModeStr;
-  if (ctrlMode == 1)
-  {
-    ctrlModeStr = "MANUAL";
-  }
-  else
-  {
-    ctrlModeStr = "AUTO";
-  }
-  //Serial.println(ctrlModeStr);
-  return String(ctrlModeStr);
-}
-
-void loraSend(String datasend)
-{
-  LoRa.beginPacket();
-  LoRa.print(datasend);
-  LoRa.endPacket();
-}
-String outputState(int output){
-  if(output){
-    return "checked";
-  }
-  else {
-    return "";
-  }
-}
-
-String ctrlbtn_pump()
-{
-    if(ctrlMode){
-      String buttons = "";
-      buttons += "<h4>Control - PUMP&nbsp;<i class=\"fas fa-shower\"></i></h4><label class=\"switch\"><input type=\"checkbox\" onchange=\"toggleCheckbox_pump(this)\" id=\"33\" " + outputState(pumpState) + "><span class=\"slider\"></span></label>";
-      return buttons;
-    }
-    else{
-      String txt = "";
-      txt += "<h4></h4>";
-      return txt;
-    }
-}
-
-String ctrlbtn_fan()
-{
-    if(ctrlMode){
-      String buttons = "";
-      buttons += "<h4>Control - FAN&nbsp;<i class=\"fas fa-fan\"></i></h4><label class=\"switch\"><input type=\"checkbox\" onchange=\"toggleCheckbox_fan(this)\" id=\"4\" " + outputState(fanState) + "><span class=\"slider\"></span></label>";
-      return buttons;
-    }
-    else{
-      String txt = "";
-      txt += "<h4></h4>";
-      return txt;
-    }
-}
-
 // Replaces placeholder with DHT values
 String processor(const String &var)
 {
@@ -684,46 +610,7 @@ String processor(const String &var)
   {
     return handleMode();
   }
-  else if(var == "BUTTONPLACEHOLDERPUMP"){
-    return ctrlbtn_pump();
-  }
-  else if(var == "BUTTONPLACEHOLDERFAN"){
-    return ctrlbtn_fan();
-  }
   return String();
-}
-
-void NotifyLine(String t)
-{
-  WiFiClientSecure client;
-  if (!client.connect("notify-api.line.me", 443))
-  {
-    Serial.println("Connection failed");
-
-    return;
-  }
-  String req = "";
-  req += "POST /api/notify HTTP/1.1\r\n";
-  req += "Host: notify-api.line.me\r\n";
-  req += "Authorization: Bearer " + String(TokenLine) + "\r\n";
-  req += "Cache-Control: no-cache\r\n";
-  req += "User-Agent: ESP32\r\n";
-  req += "Content-Type: application/x-www-form-urlencoded\r\n";
-  req += "Content-Length: " + String(String("message=" + t).length()) + "\r\n";
-  req += "\r\n";
-  req += "message=" + t;
-  //Serial.println(req);
-  client.print(req);
-  delay(20);
-  //Serial.println("-------------");
-  while (client.connected())
-  {
-    String line = client.readStringUntil('\n');
-    if (line == "\r")
-    {
-      break;
-    }
-  }
 }
 
 void insertDB()
@@ -795,50 +682,6 @@ void insertDB()
   // Free resources
   http.end();
 }
-String httpGETRequest(const char *serverName)
-{
-
-  // Your IP address with path or Domain name with URL path
-  http.begin(serverName);
-
-  // Send HTTP POST request
-  int httpResponseCode = http.GET();
-
-  String payload = "{}";
-
-  if (httpResponseCode > 0)
-  {
-    //Serial.print("HTTP Response code: ");
-    //Serial.println(httpResponseCode);
-    payload = http.getString();
-  }
-  else
-  {
-    //Serial.print("Error code: ");
-    //Serial.println(httpResponseCode);
-  }
-  // Free resources
-  http.end();
-
-  return payload;
-}
-
-
-String dataLogger()
-{
-  String url = database_server_url + "/esp-data.php";
-  return String(url);
-}
-String chart()
-{
-  String url = database_server_url + "/esp-chart.php";
-  return String(url);
-}
-String phpMyAdmin()
-{
-  String url = database_server_url + "/phpmyadmin";
-  return String(url);
-} 
 
 void setup()
 {
@@ -932,16 +775,6 @@ void setup()
     if (!request->authenticate(http_username, http_password))
       return request->requestAuthentication();
     request->send_P(200, "text/html", index_html, processor);
-  });
-  server.on("/ctrlbtn_pump", HTTP_GET, [](AsyncWebServerRequest *request) {
-    if (!request->authenticate(http_username, http_password))
-      return request->requestAuthentication();
-    request->send_P(200, "text/plain", ctrlbtn_pump().c_str());
-  });
-  server.on("/ctrlbtn_fan", HTTP_GET, [](AsyncWebServerRequest *request) {
-    if (!request->authenticate(http_username, http_password))
-      return request->requestAuthentication();
-    request->send_P(200, "text/plain", ctrlbtn_fan().c_str());
   });
   server.on("/temperature", HTTP_GET, [](AsyncWebServerRequest *request) {
     if (!request->authenticate(http_username, http_password))
@@ -1084,7 +917,7 @@ void setup()
                                         inputParam + ") with value: " + inputMessage + "<br><br><a href=\"/\">Return to Home Page</a><br>"
                                                                                        "<br><a href=\"/setting\">Return to setting page</a>");
   });
-  
+
   server.on("/logout", HTTP_GET, [](AsyncWebServerRequest *request) {
     request->send(401);
   });
@@ -1108,14 +941,8 @@ void loop(void)
   unsigned long currentMillis = millis();
   if (WiFi.status() != WL_CONNECTED)
   {
-    WiFi.begin(ssid, password);
     digitalWrite(led_check_wifi_status, LOW);
   }
-  else
-  {
-    digitalWrite(led_check_wifi_status, HIGH);
-  }
-  
   while (Serial.available())
   { //Serial from VB
     line = Serial.readString();
@@ -1228,3 +1055,80 @@ void loop(void)
   }
   inputParam = "";
 }
+
+String httpGETRequest(const char *serverName)
+{
+
+  // Your IP address with path or Domain name with URL path
+  http.begin(serverName);
+
+  // Send HTTP POST request
+  int httpResponseCode = http.GET();
+
+  String payload = "{}";
+
+  if (httpResponseCode > 0)
+  {
+    //Serial.print("HTTP Response code: ");
+    //Serial.println(httpResponseCode);
+    payload = http.getString();
+  }
+  else
+  {
+    //Serial.print("Error code: ");
+    //Serial.println(httpResponseCode);
+  }
+  // Free resources
+  http.end();
+
+  return payload;
+}
+
+void NotifyLine(String t)
+{
+  WiFiClientSecure client;
+  if (!client.connect("notify-api.line.me", 443))
+  {
+    Serial.println("Connection failed");
+
+    return;
+  }
+  String req = "";
+  req += "POST /api/notify HTTP/1.1\r\n";
+  req += "Host: notify-api.line.me\r\n";
+  req += "Authorization: Bearer " + String(TokenLine) + "\r\n";
+  req += "Cache-Control: no-cache\r\n";
+  req += "User-Agent: ESP32\r\n";
+  req += "Content-Type: application/x-www-form-urlencoded\r\n";
+  req += "Content-Length: " + String(String("message=" + t).length()) + "\r\n";
+  req += "\r\n";
+  req += "message=" + t;
+  //Serial.println(req);
+  client.print(req);
+  delay(20);
+  //Serial.println("-------------");
+  while (client.connected())
+  {
+    String line = client.readStringUntil('\n');
+    if (line == "\r")
+    {
+      break;
+    }
+  }
+}
+
+String dataLogger()
+{
+  String url = database_server_url + "/esp-data.php";
+  return String(url);
+}
+String chart()
+{
+  String url = database_server_url + "/esp-chart.php";
+  return String(url);
+}
+String phpMyAdmin()
+{
+  String url = database_server_url + "/phpmyadmin";
+  return String(url);
+} 

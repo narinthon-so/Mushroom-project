@@ -1,4 +1,4 @@
-// Import required libraries
+ // Import required libraries
 #include <WiFi.h>
 #include <WiFiClientSecure.h>
 #include <HTTPClient.h>
@@ -465,17 +465,17 @@ const char index_html[] PROGMEM = R"rawliteral(
         <span class="labels">Mode</span>
         <span id="mode">%MODE%</span>
     </div>
-
-    <div style="padding-top: 25px;">
-        <a href="#" onclick="getmode()" class="button button3"><i class="fas fa-sliders-h"></i>&nbsp;change mode</a>
-        <a href="#" onclick="requestupdate()" class="button button2"><i class="fa fa-refresh" aria-hidden="true"></i>&nbsp;request update</a>
-    </div>
-
-    <div style="padding-bottom: 25px;">
+    
+    <div>
         <a id="ctrlbtn_pump">%BUTTONPLACEHOLDERPUMP%</a>
         <a id="ctrlbtn_fan">%BUTTONPLACEHOLDERFAN%</a>
     </div>
-  
+    
+    <div style="padding-top: 20px;">
+        <a href="#" onclick="getmode()" class="button button3"><i class="fas fa-sliders-h"></i>&nbsp;change mode</a>
+        <a href="#" onclick="requestupdate()" class="button button2"><i class="fa fa-refresh" aria-hidden="true"></i>&nbsp;request update</a>
+    </div>
+   
 </body>
 
 </html>)rawliteral";

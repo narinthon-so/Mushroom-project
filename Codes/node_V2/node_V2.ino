@@ -333,9 +333,21 @@ void loop() {
     Serial.println();
   }
 
-  digitalWrite(pump, pumpState);
-  digitalWrite(fan, fanState);
+  //digitalWrite(pump, pumpState);
+  //digitalWrite(fan, fanState);
 
+//-------------------------------Active low relays
+  if (pumpState == true) {
+    digitalWrite(pump, false);
+  } else {
+    digitalWrite(pump, true);
+  }
+  if (fanState == true) {
+    digitalWrite(fan, false);
+  } else {
+    digitalWrite(fan, true);
+  }
+//-----------------------------------------
 }
 
 void loraSend(String datasend) {

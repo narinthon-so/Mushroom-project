@@ -26,10 +26,17 @@ String x;
 String line = "";
 int dataVB = 0;
 
-#include "DHT.h"
-#define DHTPIN 16
-#define DHTTYPE DHT22
-DHT dht(DHTPIN, DHTTYPE);
+//#include "DHT.h"
+//#define DHTPIN 16
+//#define DHTTYPE DHT22
+//DHT dht(DHTPIN, DHTTYPE);
+
+#include <Adafruit_AM2315.h>
+Adafruit_AM2315 am2315;
+// Connect RED of the AM2315 sensor to 5.0V
+// Connect BLACK to Ground
+// Connect WHITE to i2c clock
+// Connect YELLOW to i2c data
 
 unsigned long previousMillis = 0;
 const long interval = 1000;
@@ -51,7 +58,18 @@ void setup() {
 
   EEPROM.begin(EEPROM_SIZE);
   Serial.begin(115200);
-  dht.begin();
+  Wire.begin (21, 22);   // sda= GPIO_21 /scl= GPIO_22
+  
+  // Wake up the sensor
+  Wire.beginTransmission(AM2315_I2CADDR);
+  delay(2);
+  Wire.endTransmission();
+  
+  while (!Serial) {
+    delay(10);
+  }
+   
+  //dht.begin();
 
   lcd.begin();                      // initialize the lcd
   //lcd.backlight();
@@ -60,7 +78,11 @@ void setup() {
   set_temp_max = EEPROM.read(0);
   set_humi_min = EEPROM.read(10);
   set_humi_max = EEPROM.read(9);
-
+  
+  if (! am2315.begin()) {
+    Serial.println("Sensor not found, check wiring & pullups!");
+    while (1);
+  }
 }
 
 void loop() {
@@ -78,8 +100,9 @@ void loop() {
     sendUpdateData();
   }
 
-  temp = dht.readTemperature();
-  humi = dht.readHumidity();
+  //  temp = dht.readTemperature();
+  //  humi = dht.readHumidity();
+  am2315.readTemperatureAndHumidity(&temp, &humi);
 
   //serial ----------------------------------------------------------------------
   while (Serial.available()) { //Serial from VB
@@ -336,7 +359,7 @@ void loop() {
   //digitalWrite(pump, pumpState);
   //digitalWrite(fan, fanState);
 
-//-------------------------------Active low relays
+  //-------------------------------Active low relays
   if (pumpState == true) {
     digitalWrite(pump, false);
   } else {
@@ -347,7 +370,7 @@ void loop() {
   } else {
     digitalWrite(fan, true);
   }
-//-----------------------------------------
+  //-----------------------------------------
 }
 
 void loraSend(String datasend) {

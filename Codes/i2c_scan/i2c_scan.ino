@@ -1,45 +1,45 @@
-/*********
-  Rui Santos
-  Complete project details at https://randomnerdtutorials.com  
-*********/
+
+// ESP32 I2C Scanner
+// Based on code of Nick Gammon  http://www.gammon.com.au/forum/?id=10896
+// ESP32 DevKit - Arduino IDE 1.8.5
+// Device tested PCF8574 - Use pullup resistors 3K3 ohms !
+// PCF8574 Default Freq 100 KHz 
 
 #include <Wire.h>
- 
-void setup() {
-  Wire.begin();
-  Serial.begin(115200);
-  Serial.println("\nI2C Scanner");
+
+void setup()
+{
+  Serial.begin (115200);  
+  Wire.begin (21, 22);   // sda= GPIO_21 /scl= GPIO_22
 }
- 
-void loop() {
-  byte error, address;
-  int nDevices;
-  Serial.println("Scanning...");
-  nDevices = 0;
-  for(address = 1; address < 127; address++ ) {
-    Wire.beginTransmission(address);
-    error = Wire.endTransmission();
-    if (error == 0) {
-      Serial.print("I2C device found at address 0x");
-      if (address<16) {
-        Serial.print("0");
-      }
-      Serial.println(address,HEX);
-      nDevices++;
+
+void Scanner ()
+{
+  Serial.println ();
+  Serial.println ("I2C scanner. Scanning ...");
+  byte count = 0;
+
+  Wire.begin();
+  for (byte i = 8; i < 120; i++)
+  {
+    Wire.beginTransmission (i);          // Begin I2C transmission Address (i)
+    if (Wire.endTransmission () == 0)  // Receive 0 = success (ACK response) 
+    {
+      Serial.print ("Found address: ");
+      Serial.print (i, DEC);
+      Serial.print (" (0x");
+      Serial.print (i, HEX);     // PCF8574 7 bit address
+      Serial.println (")");
+      count++;
     }
-    else if (error==4) {
-      Serial.print("Unknow error at address 0x");
-      if (address<16) {
-        Serial.print("0");
-      }
-      Serial.println(address,HEX);
-    }    
   }
-  if (nDevices == 0) {
-    Serial.println("No I2C devices found\n");
-  }
-  else {
-    Serial.println("done\n");
-  }
-  delay(5000);          
+  Serial.print ("Found ");      
+  Serial.print (count, DEC);        // numbers of devices
+  Serial.println (" device(s).");
+}
+
+void loop()
+{
+  Scanner ();
+  delay (100);
 }

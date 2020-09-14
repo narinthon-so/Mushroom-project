@@ -1,4 +1,4 @@
- // Import required libraries
+// Import required libraries
 #include <WiFi.h>
 #include <WiFiClientSecure.h>
 #include <HTTPClient.h>
@@ -713,7 +713,7 @@ void NotifyLine(String t)
   WiFiClientSecure client;
   if (!client.connect("notify-api.line.me", 443))
   {
-    Serial.println("Connection failed");
+    Serial.println("Connection failed -LINE Notify");
 
     return;
   }
@@ -751,65 +751,30 @@ void insertDB()
   http.addHeader("Content-Type", "application/x-www-form-urlencoded");
 
   String ctrlModeStr, pumpStateStr, fanStateStr;
-  if (ctrlMode == 1)
-  {
+  if (ctrlMode == 1){
     ctrlModeStr = "MANUAL";
-  }
-  else
-  {
+  }else{
     ctrlModeStr = "AUTO";
-  }
-  if (pumpState == 1)
-  {
+  }if (pumpState == 1){
     pumpStateStr = "ON";
-  }
-  else
-  {
+  }else{
     pumpStateStr = "OFF";
-  }
-  if (fanState == 1)
-  {
+  }if (fanState == 1){
     fanStateStr = "ON";
-  }
-  else
-  {
+  }else{
     fanStateStr = "OFF";
   }
   // Prepare your HTTP POST request data
   String httpRequestData = "api_key=" + apiKeyValue + "&temp=" + String(temp) + "&humi=" + String(humi) + "&temp_limit_min=" + String(set_temp_min) + "&temp_limit_max=" + String(set_temp_max) + "&humi_limit_min=" + String(set_humi_min) + "&humi_limit_max=" + String(set_humi_max) + "&ctrl_mode=" + ctrlModeStr + "&pump_state=" + pumpStateStr + "&fan_state=" + fanStateStr + "";
 
-  //Serial.print("httpRequestData: ");
-  //Serial.println(httpRequestData);
-
-  // You can comment the httpRequestData variable above
-  // then, use the httpRequestData variable below (for testing purposes without the BME280 sensor)
-  //String httpRequestData = "api_key=tPmAT5Ab3j7F9&sensor=BME280&location=Office&value1=24.75&value2=49.54&value3=1005.14";
-
   // Send HTTP POST request
   int httpResponseCode = http.POST(httpRequestData);
 
-  // If you need an HTTP request with a content type: text/plain
-  //http.addHeader("Content-Type", "text/plain");
-  //int httpResponseCode = http.POST("Hello, World!");
-
-  // If you need an HTTP request with a content type: application/json, use the following:
-  //http.addHeader("Content-Type", "application/json");
-  //int httpResponseCode = http.POST("{\"value1\":\"19\",\"value2\":\"67\",\"value3\":\"78\"}");
-
-  if (httpResponseCode > 0)
-  {
-    //Serial.print("HTTP Response code: ");
-    //Serial.println(httpResponseCode);
-  }
-  else
-  {
-    //Serial.print("Error code: ");
-    //Serial.println(httpResponseCode);
-  }
   NotifyLine("Saving Data into Database.\nHTTP Response code: " + String(httpResponseCode));
   // Free resources
   http.end();
 }
+
 String httpGETRequest(const char *serverName)
 {
 
@@ -868,16 +833,27 @@ void setup()
   }
   // Connect to Wi-Fi
   WiFi.begin(ssid, password);
+
+  int count = 0;
   while (WiFi.status() != WL_CONNECTED)
   {
-    delay(1000);
     Serial.println("Connecting to WiFi..");
+    delay(1000);
+    count++;
+    if (count == 30) {
+      count = 0;
+      break;
+    }
   }
-  // Print ESP32 Local IP Address
-  Serial.print("Connected to " + String(ssid) + " ");
-  Serial.println(WiFi.localIP());
-  //If wifi is connected led_check_wifi_status will HIGH
-  digitalWrite(led_check_wifi_status, HIGH);
+
+  if(WiFi.status() == WL_CONNECTED){
+    // Print ESP32 Local IP Address
+    Serial.print("Connected to " + String(ssid) + " ");
+    Serial.println(WiFi.localIP());
+    //If wifi is connected led_check_wifi_status will HIGH
+    digitalWrite(led_check_wifi_status, HIGH);
+  }
+  
   //-------------------------------------------------------------------------------------
   //Get ngrok public url
   //Check WiFi connection status
@@ -917,7 +893,7 @@ void setup()
   }
   else
   {
-    Serial.println("WiFi Disconnected");
+    Serial.println("WiFi Disconnected -Get ngrok public url");
   }
 
   if (tunnelsNameArr[0] == "web_server")
@@ -1129,15 +1105,6 @@ void loop(void)
 {
 
   unsigned long currentMillis = millis();
-  if (WiFi.status() != WL_CONNECTED)
-  {
-    WiFi.begin(ssid, password);
-    digitalWrite(led_check_wifi_status, LOW);
-  }
-  else
-  {
-    digitalWrite(led_check_wifi_status, HIGH);
-  }
   
   while (Serial.available())
   { //Serial from VB
@@ -1199,8 +1166,8 @@ void loop(void)
   struct tm timeinfo;
   if (!getLocalTime(&timeinfo))
   {
-    Serial.println("Failed to obtain time");
-    return;
+//    Serial.println("Failed to obtain time");
+//    return;
   }
   char timeSec[3];
   strftime(timeSec, 3, "%S", &timeinfo); //Second

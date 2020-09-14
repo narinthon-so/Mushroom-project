@@ -15,6 +15,12 @@ LiquidCrystal_I2C lcd(0x27, 16, 2);
 #define pump 33
 #define fan 4
 
+#define R_sensing_pump 34
+#define R_sensing_fan 35
+int adc_pump_value, adc_fan_value = 0;
+float Rs_pump_voltage, Rs_fan_voltage = 0;
+bool pump_check, fan_check;
+
 bool ctrlMode = false;
 bool pumpState = false;
 bool fanState = false;
@@ -55,20 +61,23 @@ void setup() {
 
   pinMode(pump, OUTPUT);
   pinMode(fan, OUTPUT);
+  digitalWrite(pump, HIGH);
+  digitalWrite(fan, HIGH);
 
   EEPROM.begin(EEPROM_SIZE);
   Serial.begin(115200);
   Wire.begin (21, 22);   // sda= GPIO_21 /scl= GPIO_22
-  
+
   // Wake up the sensor
   Wire.beginTransmission(AM2315_I2CADDR);
   delay(2);
   Wire.endTransmission();
-  
+
   while (!Serial) {
     delay(10);
   }
-   
+
+  analogReadResolution(12);
   //dht.begin();
 
   lcd.begin();                      // initialize the lcd
@@ -78,11 +87,18 @@ void setup() {
   set_temp_max = EEPROM.read(0);
   set_humi_min = EEPROM.read(10);
   set_humi_max = EEPROM.read(9);
-  
-  if (! am2315.begin()) {
+
+  int count = 0;
+  while (! am2315.begin()) {
     Serial.println("Sensor not found, check wiring & pullups!");
-    while (1);
+    delay(1000);
+    count++;
+    if (count == 30) {
+      count = 0;
+      break;
+    }
   }
+  
 }
 
 void loop() {
@@ -99,6 +115,27 @@ void loop() {
     }
     sendUpdateData();
   }
+  //--------------------------------------------R sensing
+  // Reading adc values
+  adc_pump_value = analogRead(R_sensing_pump);
+  adc_fan_value = analogRead(R_sensing_fan);
+  //Serial.print(adc_pump_value); Serial.print("  "); Serial.println(adc_fan_value);
+
+  //calculate to voltage
+  Rs_pump_voltage = (adc_pump_value * 3.3 / 4095);
+  Rs_fan_voltage = (adc_fan_value * 3.3 / 4095);
+  //Serial.print(Rs_pump_voltage); Serial.print("  "); Serial.println(Rs_fan_voltage);
+  if (Rs_pump_voltage > 0.10) {
+    pump_check = true;
+  } else {
+    pump_check = false;
+  }
+  if (Rs_fan_voltage > 0.10) {
+    fan_check = true;
+  } else {
+    fan_check = false;
+  }
+  //------------------------------------------------------------
 
   //  temp = dht.readTemperature();
   //  humi = dht.readHumidity();
@@ -208,7 +245,7 @@ void loop() {
           EEPROM.commit();
           sendUpdateData();
         }
-        else if (head == "J") {
+        else if (head == "J") { 
           set_humi_max = dataLR;
           EEPROM.write(9, set_humi_max);
           EEPROM.commit();
@@ -344,13 +381,13 @@ void loop() {
     Serial.print("P");
     lcd.setCursor(8, 0);
     lcd.print("P:");
-    Serial.print(pumpState);
-    lcd.print(pumpState);
+    Serial.print(pump_check);
+    lcd.print(pump_check);
     Serial.print("F");
     lcd.setCursor(8, 1);
     lcd.print("F:");
-    Serial.print(fanState);
-    lcd.print(fanState);
+    Serial.print(fan_check);
+    lcd.print(fan_check);
     Serial.print(set_temp_min);
     Serial.print(set_humi_max);
     Serial.println();
@@ -383,32 +420,15 @@ void loraSend(String datasend) {
 void sendUpdateData() { //this function will call when sumting change ...
   //--------------------------------------------------
   //change pumpState and fanState before sendUpdateData ***if not pumpState and fanState on webserver will not be real value
-  if (ctrlMode == false) { // auto mode
-
-    if (humi < set_humi_min) {
-      pumpState = true;
-    } else {
-      pumpState = false;
-    }
-
-    if (humi > set_humi_max) {
-      pumpState = false;
-    } else {
-      pumpState = true;
-    }
-
-    if (temp > set_temp_max) {
-      fanState = true; //ลดอุณหภูมิ
-    } else {
-      fanState = false;
-    }
-
-    if (temp < set_temp_min) {
-      //เพิ่มอุณหภูมิ
-    } else {
-      //noting
-    }
-
+  if (Rs_pump_voltage > 0.10) {
+    pump_check = true;
+  } else {
+    pump_check = false;
+  }
+  if (Rs_fan_voltage > 0.10) {
+    fan_check = true;
+  } else {
+    fan_check = false;
   }
   //----------------------------------------------------
   LoRa.beginPacket();
@@ -432,9 +452,9 @@ void sendUpdateData() { //this function will call when sumting change ...
   LoRa.print("M");
   LoRa.print(ctrlMode);
   LoRa.print("P");
-  LoRa.print(pumpState);
+  LoRa.print(pump_check);
   LoRa.print("F");
-  LoRa.print(fanState);
+  LoRa.print(fan_check);
   LoRa.print(set_temp_min);
   LoRa.print(set_humi_max);
   LoRa.endPacket();

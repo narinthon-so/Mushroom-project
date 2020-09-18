@@ -42,14 +42,12 @@ Partial Class Mushroom
         Me.Button_Connect = New System.Windows.Forms.Button()
         Me.ComboBox_AvailableSerialPorts = New System.Windows.Forms.ComboBox()
         Me.SerialPort1 = New System.IO.Ports.SerialPort(Me.components)
-        Me.Label16 = New System.Windows.Forms.Label()
         Me.Label17 = New System.Windows.Forms.Label()
         Me.Label18 = New System.Windows.Forms.Label()
         Me.Label19 = New System.Windows.Forms.Label()
         Me.Label20 = New System.Windows.Forms.Label()
         Me.Label21 = New System.Windows.Forms.Label()
         Me.Label22 = New System.Windows.Forms.Label()
-        Me.Label23 = New System.Windows.Forms.Label()
         Me.GroupBox2 = New System.Windows.Forms.GroupBox()
         Me.Button7 = New System.Windows.Forms.Button()
         Me.Button5 = New System.Windows.Forms.Button()
@@ -64,10 +62,10 @@ Partial Class Mushroom
         Me.PictureBox2 = New System.Windows.Forms.PictureBox()
         Me.PictureBox3 = New System.Windows.Forms.PictureBox()
         Me.PictureBox4 = New System.Windows.Forms.PictureBox()
-        Me.LabelDebug = New System.Windows.Forms.Label()
         Me.MenuStrip1 = New System.Windows.Forms.MenuStrip()
         Me.FileToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.SettingToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.LogoutToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.CloseToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.ViewToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.DataLoggerToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
@@ -101,7 +99,6 @@ Partial Class Mushroom
         Me.GroupBox3 = New System.Windows.Forms.GroupBox()
         Me.GroupBox4 = New System.Windows.Forms.GroupBox()
         Me.GroupBox6 = New System.Windows.Forms.GroupBox()
-        Me.LogoutToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.GroupBox1.SuspendLayout()
         Me.GroupBox2.SuspendLayout()
         CType(Me.PictureBox1, System.ComponentModel.ISupportInitialize).BeginInit()
@@ -300,15 +297,6 @@ Partial Class Mushroom
         '
         Me.SerialPort1.BaudRate = 115200
         '
-        'Label16
-        '
-        Me.Label16.AutoSize = True
-        Me.Label16.Location = New System.Drawing.Point(535, 0)
-        Me.Label16.Name = "Label16"
-        Me.Label16.Size = New System.Drawing.Size(59, 17)
-        Me.Label16.TabIndex = 20
-        Me.Label16.Text = "Label16"
-        '
         'Label17
         '
         Me.Label17.AutoSize = True
@@ -368,15 +356,6 @@ Partial Class Mushroom
         Me.Label22.Size = New System.Drawing.Size(25, 32)
         Me.Label22.TabIndex = 28
         Me.Label22.Text = "-"
-        '
-        'Label23
-        '
-        Me.Label23.AutoSize = True
-        Me.Label23.Location = New System.Drawing.Point(535, 32)
-        Me.Label23.Name = "Label23"
-        Me.Label23.Size = New System.Drawing.Size(59, 17)
-        Me.Label23.TabIndex = 29
-        Me.Label23.Text = "Label23"
         '
         'GroupBox2
         '
@@ -535,15 +514,6 @@ Partial Class Mushroom
         Me.PictureBox4.TabIndex = 37
         Me.PictureBox4.TabStop = False
         '
-        'LabelDebug
-        '
-        Me.LabelDebug.AutoSize = True
-        Me.LabelDebug.Location = New System.Drawing.Point(535, 66)
-        Me.LabelDebug.Name = "LabelDebug"
-        Me.LabelDebug.Size = New System.Drawing.Size(59, 17)
-        Me.LabelDebug.TabIndex = 38
-        Me.LabelDebug.Text = "Label30"
-        '
         'MenuStrip1
         '
         Me.MenuStrip1.BackColor = System.Drawing.SystemColors.WindowFrame
@@ -551,7 +521,7 @@ Partial Class Mushroom
         Me.MenuStrip1.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.FileToolStripMenuItem, Me.ViewToolStripMenuItem})
         Me.MenuStrip1.Location = New System.Drawing.Point(0, 0)
         Me.MenuStrip1.Name = "MenuStrip1"
-        Me.MenuStrip1.Size = New System.Drawing.Size(829, 30)
+        Me.MenuStrip1.Size = New System.Drawing.Size(829, 28)
         Me.MenuStrip1.TabIndex = 41
         Me.MenuStrip1.Text = "MenuStrip1"
         '
@@ -559,27 +529,34 @@ Partial Class Mushroom
         '
         Me.FileToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.SettingToolStripMenuItem, Me.LogoutToolStripMenuItem, Me.CloseToolStripMenuItem})
         Me.FileToolStripMenuItem.Name = "FileToolStripMenuItem"
-        Me.FileToolStripMenuItem.Size = New System.Drawing.Size(46, 26)
+        Me.FileToolStripMenuItem.Size = New System.Drawing.Size(46, 24)
         Me.FileToolStripMenuItem.Text = "File"
         '
         'SettingToolStripMenuItem
         '
         Me.SettingToolStripMenuItem.Image = CType(resources.GetObject("SettingToolStripMenuItem.Image"), System.Drawing.Image)
         Me.SettingToolStripMenuItem.Name = "SettingToolStripMenuItem"
-        Me.SettingToolStripMenuItem.Size = New System.Drawing.Size(224, 26)
+        Me.SettingToolStripMenuItem.Size = New System.Drawing.Size(166, 26)
         Me.SettingToolStripMenuItem.Text = "Config URL"
+        '
+        'LogoutToolStripMenuItem
+        '
+        Me.LogoutToolStripMenuItem.Image = CType(resources.GetObject("LogoutToolStripMenuItem.Image"), System.Drawing.Image)
+        Me.LogoutToolStripMenuItem.Name = "LogoutToolStripMenuItem"
+        Me.LogoutToolStripMenuItem.Size = New System.Drawing.Size(166, 26)
+        Me.LogoutToolStripMenuItem.Text = "Logout"
         '
         'CloseToolStripMenuItem
         '
         Me.CloseToolStripMenuItem.Name = "CloseToolStripMenuItem"
-        Me.CloseToolStripMenuItem.Size = New System.Drawing.Size(224, 26)
+        Me.CloseToolStripMenuItem.Size = New System.Drawing.Size(166, 26)
         Me.CloseToolStripMenuItem.Text = "Close"
         '
         'ViewToolStripMenuItem
         '
         Me.ViewToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.DataLoggerToolStripMenuItem, Me.ChartToolStripMenuItem, Me.PhpMyAdminToolStripMenuItem, Me.WebServerToolStripMenuItem})
         Me.ViewToolStripMenuItem.Name = "ViewToolStripMenuItem"
-        Me.ViewToolStripMenuItem.Size = New System.Drawing.Size(55, 26)
+        Me.ViewToolStripMenuItem.Size = New System.Drawing.Size(55, 24)
         Me.ViewToolStripMenuItem.Text = "View"
         '
         'DataLoggerToolStripMenuItem
@@ -879,13 +856,6 @@ Partial Class Mushroom
         Me.GroupBox6.TabStop = False
         Me.GroupBox6.Text = "Setting and Status"
         '
-        'LogoutToolStripMenuItem
-        '
-        Me.LogoutToolStripMenuItem.Image = CType(resources.GetObject("LogoutToolStripMenuItem.Image"), System.Drawing.Image)
-        Me.LogoutToolStripMenuItem.Name = "LogoutToolStripMenuItem"
-        Me.LogoutToolStripMenuItem.Size = New System.Drawing.Size(224, 26)
-        Me.LogoutToolStripMenuItem.Text = "Logout"
-        '
         'Mushroom
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(8.0!, 16.0!)
@@ -914,7 +884,6 @@ Partial Class Mushroom
         Me.Controls.Add(Me.Label35)
         Me.Controls.Add(Me.Label36)
         Me.Controls.Add(Me.Label37)
-        Me.Controls.Add(Me.LabelDebug)
         Me.Controls.Add(Me.PictureBox4)
         Me.Controls.Add(Me.PictureBox3)
         Me.Controls.Add(Me.PictureBox2)
@@ -924,14 +893,12 @@ Partial Class Mushroom
         Me.Controls.Add(Me.Label27)
         Me.Controls.Add(Me.Label26)
         Me.Controls.Add(Me.GroupBox2)
-        Me.Controls.Add(Me.Label23)
         Me.Controls.Add(Me.Label22)
         Me.Controls.Add(Me.Label21)
         Me.Controls.Add(Me.Label20)
         Me.Controls.Add(Me.Label19)
         Me.Controls.Add(Me.Label18)
         Me.Controls.Add(Me.Label17)
-        Me.Controls.Add(Me.Label16)
         Me.Controls.Add(Me.GroupBox1)
         Me.Controls.Add(Me.Label11)
         Me.Controls.Add(Me.Label10)
@@ -987,14 +954,12 @@ Partial Class Mushroom
     Friend WithEvents SerialPort1 As IO.Ports.SerialPort
     Friend WithEvents Label15 As Label
     Friend WithEvents Label14 As Label
-    Friend WithEvents Label16 As Label
     Friend WithEvents Label17 As Label
     Friend WithEvents Label18 As Label
     Friend WithEvents Label19 As Label
     Friend WithEvents Label20 As Label
     Friend WithEvents Label21 As Label
     Friend WithEvents Label22 As Label
-    Friend WithEvents Label23 As Label
     Friend WithEvents GroupBox2 As GroupBox
     Friend WithEvents Label25 As Label
     Friend WithEvents Label24 As Label
@@ -1009,7 +974,6 @@ Partial Class Mushroom
     Friend WithEvents PictureBox2 As PictureBox
     Friend WithEvents PictureBox3 As PictureBox
     Friend WithEvents PictureBox4 As PictureBox
-    Friend WithEvents LabelDebug As Label
     Friend WithEvents MenuStrip1 As MenuStrip
     Friend WithEvents FileToolStripMenuItem As ToolStripMenuItem
     Friend WithEvents CloseToolStripMenuItem As ToolStripMenuItem

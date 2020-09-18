@@ -1,27 +1,29 @@
-<!DOCTYPE HTML>
-<html>
-
+<!DOCTYPE HTML><html>
 <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <script src="https://kit.fontawesome.com/43df6e3879.js" crossorigin="anonymous"></script>
-    <style>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mushroom Web Server</title>
+  <script src="https://kit.fontawesome.com/43df6e3879.js" crossorigin="anonymous"></script>
+     <style>
         html {
             font-family: Arial, Helvetica, sans-serif;
             display: inline-block;
             margin: 0px auto;
             text-align: center;
-            min-width: 500px;
-            max-width: 800px;
+            transform: scale(0.85);
+	        transform-origin: top,left;
         }
-        *{
-            box-sizing: border-box;
-        }
+
         h2 {
             font-size: 3.0rem;
         }
 
         .text {
             font-size: 3.0rem;
+            padding-bottom: 10px;
+        }
+
+        .text2 {
+            font-size: 2.0rem;
             padding-bottom: 10px;
         }
 
@@ -48,8 +50,8 @@
         }
 
         .button2 {
-            background-color: white;
-            color: black;
+            background-color: white; 
+            color: black; 
             border: 2px solid #008CBA;
             border-radius: 12px;
         }
@@ -60,8 +62,8 @@
         }
 
         .button3 {
-            background-color: white;
-            color: black;
+            background-color: white; 
+            color: black; 
             border: 2px solid #f44336;
             border-radius: 12px;
         }
@@ -104,7 +106,7 @@
             font-size: 36px;
             margin-left: 50px;
         }
-
+        
         @media screen and (max-height: 450px) {
             .sidenav {
                 padding-top: 15px;
@@ -114,47 +116,21 @@
                 font-size: 18px;
             }
         }
-
-        .row:after {
-            content: "";
-            display: table;
-            clear: both;
-        }
-
-        .halfleft {
-            float: left;
-            width: 50%;
-            text-align: center;
-        }
-
-        .halfright {
-            float: right;
-            width: 50%;
-            text-align: center;
-        }
-
-        .card {
-            box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
-            transition: 0.3s;
-            width: 90%;
-            margin: auto;
-            position: relative;
-        }
-
-        .card:hover {
-            box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2);
-        }
-
-        .container {
-            padding: 2px 16px;
-        }
+        .switch {position: relative; display: inline-block; width: 120px; height: 68px} 
+        .switch input {display: none}
+        .slider {position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; border-radius: 6px}
+        .slider:before {position: absolute; content: ""; height: 52px; width: 52px; left: 8px; bottom: 8px; background-color: #fff; -webkit-transition: .4s; transition: .4s; border-radius: 3px}
+        input:checked+.slider {background-color: #b30000}
+        input:checked+.slider:before {-webkit-transform: translateX(52px); -ms-transform: translateX(52px); transform: translateX(52px)}
+  
     </style>
 </head>
 <script>
-
+  
     function openNav() {
         document.getElementById("mySidenav").style.width = "250px";
     }
+
     function closeNav() {
         document.getElementById("mySidenav").style.width = "0";
     }
@@ -164,6 +140,54 @@
         xhr.send();
         setTimeout(function () { window.open("/logged-out", "_self"); }, 1000);
     }
+
+    function getmode() {
+        var xhttp = new XMLHttpRequest();
+          xhttp.onreadystatechange = function () {
+            if (this.readyState == 4 && this.status == 200) {
+                alert(this.responseText);
+            }
+        };
+          xhttp.open("GET", "/M", true);
+          xhttp.send();
+    }
+
+    function requestupdate() {
+        var xhttp = new XMLHttpRequest();
+          xhttp.onreadystatechange = function () {
+            if (this.readyState == 4 && this.status == 200) {
+                alert(this.responseText);
+            }
+        };
+          xhttp.open("GET", "/requestupdate", true);
+          xhttp.send();
+    }
+    
+    
+    function toggleCheckbox_pump(element) {
+      var xhr = new XMLHttpRequest();
+          xhr.onreadystatechange = function () {
+            if (this.readyState == 4 && this.status == 200) {
+                alert(this.responseText);
+            }
+        };
+        if(element.checked){ xhr.open("GET", "/P", true); }
+        else { xhr.open("GET", "/P", true); }
+        xhr.send();
+    }
+
+    function toggleCheckbox_fan(element) {
+      var xhr = new XMLHttpRequest();
+          xhr.onreadystatechange = function () {
+            if (this.readyState == 4 && this.status == 200) {
+                alert(this.responseText);
+            }
+        };
+        if(element.checked){ xhr.open("GET", "/F", true); }
+        else { xhr.open("GET", "/F", true); }
+        xhr.send();
+    }
+    
     setInterval(function () {
         var xhttp = new XMLHttpRequest();
         xhttp.onreadystatechange = function () {
@@ -174,6 +198,40 @@
         xhttp.open("GET", "/temperature", true);
         xhttp.send();
     }, 5000);
+    
+    setInterval(function () {
+        var xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function () {
+            if (this.readyState == 4 && this.status == 200) {
+                document.getElementById("ctrlbtn_pump").innerHTML = this.responseText;
+            }
+        };
+        xhttp.open("GET", "/ctrlbtn_pump", true);
+        xhttp.send();
+    }, 5000);
+
+    setInterval(function () {
+        var xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function () {
+            if (this.readyState == 4 && this.status == 200) {
+                document.getElementById("ctrlbtn_fan").innerHTML = this.responseText;
+            }
+        };
+        xhttp.open("GET", "/ctrlbtn_fan", true);
+        xhttp.send();
+    }, 5000);
+    
+    setInterval(function () {
+        var xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function () {
+            if (this.readyState == 4 && this.status == 200) {
+                document.getElementById("temperaturelimitmin").innerHTML = this.responseText;
+            }
+        };
+        xhttp.open("GET", "/temperaturelimitmin", true);
+        xhttp.send();
+    }, 5000);
+
     setInterval(function () {
         var xhttp = new XMLHttpRequest();
         xhttp.onreadystatechange = function () {
@@ -184,6 +242,7 @@
         xhttp.open("GET", "/temperaturelimitmax", true);
         xhttp.send();
     }, 5000);
+
     setInterval(function () {
         var xhttp = new XMLHttpRequest();
         xhttp.onreadystatechange = function () {
@@ -194,6 +253,7 @@
         xhttp.open("GET", "/humidity", true);
         xhttp.send();
     }, 5000);
+
     setInterval(function () {
         var xhttp = new XMLHttpRequest();
         xhttp.onreadystatechange = function () {
@@ -204,6 +264,18 @@
         xhttp.open("GET", "/humiditylimitmin", true);
         xhttp.send();
     }, 5000);
+
+    setInterval(function () {
+        var xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function () {
+            if (this.readyState == 4 && this.status == 200) {
+                document.getElementById("humiditylimitmax").innerHTML = this.responseText;
+            }
+        };
+        xhttp.open("GET", "/humiditylimitmax", true);
+        xhttp.send();
+    }, 5000);
+    
     setInterval(function () {
         var xhttp = new XMLHttpRequest();
         xhttp.onreadystatechange = function () {
@@ -214,6 +286,7 @@
         xhttp.open("GET", "/pump", true);
         xhttp.send();
     }, 5000);
+
     setInterval(function () {
         var xhttp = new XMLHttpRequest();
         xhttp.onreadystatechange = function () {
@@ -224,6 +297,7 @@
         xhttp.open("GET", "/fan", true);
         xhttp.send();
     }, 5000);
+
     setInterval(function () {
         var xhttp = new XMLHttpRequest();
         xhttp.onreadystatechange = function () {
@@ -234,42 +308,45 @@
         xhttp.open("GET", "/mode", true);
         xhttp.send();
     }, 5000);
+     
 </script>
-
+</script>
 <body>
     <script language="javascript" type="text/javascript">
-        openDataLogger = function () {
-            var xhttp = new XMLHttpRequest();
-            xhttp.onreadystatechange = function () {
-                if (this.readyState == 4 && this.status == 200) {
-                    location.href = this.responseText;
-                }
-            };
-            xhttp.open("GET", "/datalogger", true);
-            xhttp.send();
+
+        openDataLogger = function() {
+          var xhttp = new XMLHttpRequest();
+          xhttp.onreadystatechange = function () {
+            if (this.readyState == 4 && this.status == 200) {
+                location.href = this.responseText;
+            }
+        };
+          xhttp.open("GET", "/datalogger", true);
+          xhttp.send();
         }
-        openChart = function () {
-            var xhttp = new XMLHttpRequest();
-            xhttp.onreadystatechange = function () {
-                if (this.readyState == 4 && this.status == 200) {
-                    location.href = this.responseText;
-                }
-            };
-            xhttp.open("GET", "/chart", true);
-            xhttp.send();
+        openChart = function() {
+          var xhttp = new XMLHttpRequest();
+          xhttp.onreadystatechange = function () {
+            if (this.readyState == 4 && this.status == 200) {
+                location.href = this.responseText;
+            }
+        };
+          xhttp.open("GET", "/chart", true);
+          xhttp.send();
         }
-        openPhpMyAdmin = function () {
-            var xhttp = new XMLHttpRequest();
-            xhttp.onreadystatechange = function () {
-                if (this.readyState == 4 && this.status == 200) {
-                    location.href = this.responseText;
-                }
-            };
-            xhttp.open("GET", "/phpmyadmin", true);
-            xhttp.send();
+        openPhpMyAdmin = function() {
+          var xhttp = new XMLHttpRequest();
+          xhttp.onreadystatechange = function () {
+            if (this.readyState == 4 && this.status == 200) {
+                location.href = this.responseText;
+            }
+        };
+          xhttp.open("GET", "/phpmyadmin", true);
+          xhttp.send();
         }
 
     </script>
+
     <div id="mySidenav" class="sidenav" style="text-align: left;">
         <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
         <a href="javascript:openDataLogger()"><i class="fa fa-table" aria-hidden="true"></i>&nbsp;Data Logger</a>
@@ -281,81 +358,66 @@
     <div style="text-align: left;">
         <span style="font-size:30px;cursor:pointer" onclick="openNav()">&#9776;</span>
     </div>
+
     <h2 style="margin-top: 0px;">Mushroom Web Server</h2>
-
-    <div class="row">
-        <div class="halfleft"> 
-            <div class="card">
-                <div class="text" style="padding-bottom: 25px; padding-top: 25px;">
-                    <i class="fas fa-thermometer-half" style="color:#059e8a;"></i>
-                    <span class="labels">Temperature</span>
-                    <br><span id="temperature">25</span>
-                    <sup class="units" style="font-weight:bold; font-size:1.5rem;">&deg;C</sup>
-                    <br><span class="labels">Temperature Limit</span><br>
-                    <div class="row">
-                        <div class="halfleft">
-                            <span class="labels">MIN</span><br>
-                            <span id="temperaturelimitmin">20</span>
-                            <sup class="units" style="font-weight:bold; font-size:1.5rem;">&deg;C</sup>
-                        </div>
-                        <div class="halfright">
-                            <span class="labels">MAX</span><br>
-                            <span id="temperaturelimitmax">30</span>
-                            <sup class="units" style="font-weight:bold; font-size:1.5rem;">&deg;C</sup>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="halfright">
-            <div class="card">
-                <div class="text" style="padding-top: 25px; padding-bottom: 25px;">
-                    <i class="fas fa-tint" style="color:#00add6;"></i>
-                    <span class="labels">Humidity</span>
-                    <br><span id="humidity">80</span>
-                    <sup class="units"><i class="fas fa-percent"></i></sup>
-                    <br><span class="labels">Humidity Limit</span><br>
-                    <div class="row">
-                        <div class="halfleft">
-                            <span class="labels">MIN</span><br>
-                            <span id="humiditylimitmin">80</span>
-                            <sup class="units"><i class="fas fa-percent"></i></sup>
-                        </div>
-                        <div class="halfright">
-                            <span class="labels">MAX</span><br>
-                            <span id="humiditylimitmax">85</span>
-                            <sup class="units"><i class="fas fa-percent"></i></sup>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="card" style="margin-top: 25px; margin-bottom: 25px;">
-        <div class="text" style="padding-top: 25px;">
-            <i class="fas fa-shower" style="color:#00add6;"></i>
-            <span class="labels">Pump</span>
-            <span id="pump">%PUMP%</span>
-        </div>
-        <div class="text">
-            <i class="fas fa-fan" style="color:#00add6;"></i>
-            <span class="labels">Fan</span>
-            <span id="fan">%FAN%</span>
-        </div>
-        <div class="text" style="padding-bottom: 25px;">
-            <i class="fas fa-sliders-h" style="color:#00add6;"></i>
-            <span class="labels">Mode</span>
-            <span id="mode">%MODE%</span>
-        </div>
-    </div>
-    <div class="card">
-        <div style="padding-top: 25px; padding-bottom: 25px;">
-            <a href="/P" class="button button2"><i class="fas fa-shower"></i>&nbsp;pump on/off</a>
-            <a href="/F" class="button button2"><i class="fas fa-fan"></i>&nbsp;fan on/off</a>
-            <a href="/M" class="button button3"><i class="fas fa-sliders-h"></i>&nbsp;change mode</a>
-        </div>
+    <div class="text">
+        <i class="fas fa-thermometer-half" style="color:#059e8a;"></i>
+        <span class="labels">Temperature</span>
+        <span id="temperature">%TEMPERATURE%</span>
+        <sup class="units" style="font-weight:bold; font-size:1.5rem;">&deg;C</sup>
+        
+        <br><span class="labels">Min</span>
+        <span id="temperaturelimitmin" class="text2">%TEMPERATURELIMITMIN%</span>
+        <sup class="units" style="font-weight:bold; font-size:1.5rem;">&deg;C</sup>
+        
+        <span class="labels">Max</span>
+        <span id="temperaturelimitmax" class="text2">%TEMPERATURELIMITMAX%</span>
+        <sup class="units" style="font-weight:bold; font-size:1.5rem;">&deg;C</sup>
     </div>
 
+    <div class="text" style="padding-top: 25px;">
+        <i class="fas fa-tint" style="color:#00add6;"></i>
+        <span class="labels">Humidity</span>
+        <span id="humidity">%HUMIDITY%</span>
+        <sup class="units"><i class="fas fa-percent"></i></sup>
+        
+        <br><span class="labels">Min</span>
+        <span id="humiditylimitmin" class="text2">%HUMIDITYLIMITMIN%</span>
+        <sup class="units"><i class="fas fa-percent"></i></sup>
+        
+        <span class="labels">Max</span>
+        <span id="humiditylimitmax" class="text2">%HUMIDITYLIMITMAX%</span>
+        <sup class="units"><i class="fas fa-percent"></i></sup>
+    </div>
+
+    <div class="text" style="padding-top: 25px;">
+        <i class="fas fa-shower" style="color:#00add6;"></i>
+        <span class="labels">Pump</span>
+        <span id="pump">%PUMP%</span>
+    </div>
+
+    <div class="text">
+        <i class="fas fa-fan" style="color:#00add6;"></i>
+        <span class="labels">Fan</span>
+        <span id="fan">%FAN%</span>
+    </div>
+
+    <div class="text">
+        <i class="fas fa-sliders-h" style="color:#00add6;"></i>
+        <span class="labels">Mode</span>
+        <span id="mode">%MODE%</span>
+    </div>
+    
+    <div>
+        <a id="ctrlbtn_pump">%BUTTONPLACEHOLDERPUMP%</a>
+        <a id="ctrlbtn_fan">%BUTTONPLACEHOLDERFAN%</a>
+    </div>
+    
+    <div style="padding-top: 20px; padding-bottom: 20px;">
+        <a href="#" onclick="getmode()" class="button button3"><i class="fas fa-sliders-h"></i>&nbsp;change mode</a>
+        <a href="#" onclick="requestupdate()" class="button button2"><i class="fa fa-refresh" aria-hidden="true"></i>&nbsp;request update</a>
+    </div>
+   
 </body>
 
 </html>

@@ -15,11 +15,13 @@ LiquidCrystal_I2C lcd(0x27, 16, 2);
 #define pump 33
 #define fan 4
 
-#define R_sensing_pump 34
+#define R_sensing_pump 25
 #define R_sensing_fan 35
 int adc_pump_value, adc_fan_value = 0;
 float Rs_pump_voltage, Rs_fan_voltage = 0;
 bool pump_check, fan_check;
+int last_pump_check = pump_check;
+int last_fan_check = fan_check;
 
 bool ctrlMode = false;
 bool pumpState = false;
@@ -98,10 +100,12 @@ void setup() {
       break;
     }
   }
-  
 }
 
 void loop() {
+
+  last_pump_check = pump_check;
+  last_fan_check = fan_check;
 
   //change mode
   if (digitalRead(sw1) == 0) {
@@ -125,7 +129,7 @@ void loop() {
   Rs_pump_voltage = (adc_pump_value * 3.3 / 4095);
   Rs_fan_voltage = (adc_fan_value * 3.3 / 4095);
   //Serial.print(Rs_pump_voltage); Serial.print("  "); Serial.println(Rs_fan_voltage);
-  if (Rs_pump_voltage > 0.10) {
+  if (Rs_pump_voltage > 0.01) {
     pump_check = true;
   } else {
     pump_check = false;
@@ -135,6 +139,16 @@ void loop() {
   } else {
     fan_check = false;
   }
+
+  if (pump_check != last_pump_check) {
+    sendUpdateData();
+  }
+  last_pump_check = pump_check;
+
+  if (fan_check != last_fan_check) {
+    sendUpdateData();
+  }
+  last_fan_check = fan_check;
   //------------------------------------------------------------
 
   //  temp = dht.readTemperature();
@@ -145,6 +159,11 @@ void loop() {
   while (Serial.available()) { //Serial from VB
     char  i = Serial.read();
     line += i;
+    lcd.clear();
+    lcd.setCursor(0, 0);
+    lcd.print("Serial Received");
+    lcd.setCursor(0, 1);
+    lcd.print("Keyword = " + line);
   }
   String Head = line.substring(0, 1);
   dataVB = line.substring(1, 3).toInt();  // real da sub 3 time EX H20
@@ -185,21 +204,18 @@ void loop() {
     sendUpdateData();
     line = "";
   } else if (Head == "P") {
-    int state = line.substring(1, 2).toInt();
-    if (state == 1) {
+    if (pumpState == false) {
       pumpState = true;
     } else {
       pumpState = false;
     }
     sendUpdateData();
   } else if (Head == "F") {
-    int state = line.substring(1, 2).toInt();
-    if (state == 1) {
+    if (fanState == false) {
       fanState = true;
     } else {
       fanState = false;
     }
-
     sendUpdateData();
   }
   //reset line value
@@ -212,10 +228,15 @@ void loop() {
     // received a packet
     // Serial.print("Received packet '");
     // read packet
+    lcd.clear();
+    lcd.setCursor(0, 0);
+    lcd.print("Lora Received...");
     while (LoRa.available()) {
       if (LoRa.find(ipAddr)) {
         x = LoRa.readString();
         //Serial.println(x);
+        lcd.setCursor(0, 1);
+        lcd.print("Keyword = " + x);
         String head = x.substring(0, 1);
         int dataLR = x.substring(1, 3).toInt();
         if (head == "M") {
@@ -245,7 +266,7 @@ void loop() {
           EEPROM.commit();
           sendUpdateData();
         }
-        else if (head == "J") { 
+        else if (head == "J") {
           set_humi_max = dataLR;
           EEPROM.write(9, set_humi_max);
           EEPROM.commit();
@@ -281,31 +302,34 @@ void loop() {
 
   //check mode-------------------------------------------------------------
   if (ctrlMode == false) { // auto mode
-
-    if (humi < set_humi_min) {
-      pumpState = true;
-    } else {
-      pumpState = false;
+    //temperature and humidity control
+    if (temp < set_temp_min && humi < set_humi_min) {
+      pumpState = true; fanState = false;
     }
-
-    if (humi > set_humi_max) {
-      pumpState = false;
-    } else {
-      pumpState = true;
+    if (temp < set_temp_min && (humi >= set_humi_min && humi <= set_humi_max)) {
+      pumpState = false; fanState = false;
     }
-
-    if (temp > set_temp_max) {
-      fanState = true; //ลดอุณหภูมิ
-    } else {
-      fanState = false;
+    if (temp < set_temp_min && humi > set_humi_max) {
+      pumpState = false; fanState = true;
     }
-
-    if (temp < set_temp_min) {
-      //เพิ่มอุณหภูมิ
-    } else {
-      //noting
+    if ((temp >= set_temp_min && temp <= set_temp_max) && humi < set_humi_min) {
+      pumpState = true; fanState = false;
     }
-
+    if ((temp >= set_temp_min && temp <= set_temp_max) && (humi >= set_humi_min && humi <= set_humi_max)) {
+      pumpState = false; fanState = false;
+    }
+    if ((temp >= set_temp_min && temp <= set_temp_max) && humi > set_humi_max) {
+      pumpState = false; fanState = true;
+    }
+    if (temp > set_temp_max && humi < set_humi_min) {
+      pumpState = true; fanState = true;
+    }
+    if (temp > set_temp_max && (humi >= set_humi_min && humi <= set_humi_max)) {
+      pumpState = false; fanState = true;
+    }
+    if (temp > set_temp_max && humi > set_humi_max) {
+      pumpState = false; fanState = true;
+    }
   }
   else if (ctrlMode == true) { // manual mode
 
@@ -344,6 +368,7 @@ void loop() {
   unsigned long currentMillis = millis();
   if (currentMillis - previousMillis >= interval) {
     previousMillis = currentMillis;
+    lcd.clear();
     Serial.print("T");
     lcd.setCursor(0, 0);
     lcd.print("T:");
@@ -420,7 +445,17 @@ void loraSend(String datasend) {
 void sendUpdateData() { //this function will call when sumting change ...
   //--------------------------------------------------
   //change pumpState and fanState before sendUpdateData ***if not pumpState and fanState on webserver will not be real value
-  if (Rs_pump_voltage > 0.10) {
+  //--------------------------------------------R sensing
+  // Reading adc values
+  adc_pump_value = analogRead(R_sensing_pump);
+  adc_fan_value = analogRead(R_sensing_fan);
+  //Serial.print(adc_pump_value); Serial.print("  "); Serial.println(adc_fan_value);
+
+  //calculate to voltage
+  Rs_pump_voltage = (adc_pump_value * 3.3 / 4095);
+  Rs_fan_voltage = (adc_fan_value * 3.3 / 4095);
+  //Serial.print(Rs_pump_voltage); Serial.print("  "); Serial.println(Rs_fan_voltage);
+  if (Rs_pump_voltage > 0.01) {
     pump_check = true;
   } else {
     pump_check = false;
@@ -430,6 +465,7 @@ void sendUpdateData() { //this function will call when sumting change ...
   } else {
     fan_check = false;
   }
+  //------------------------------------------------------------
   //----------------------------------------------------
   LoRa.beginPacket();
   LoRa.print(String(des) + String(ipAddr));

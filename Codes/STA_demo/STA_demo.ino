@@ -184,7 +184,7 @@ const char index_html[] PROGMEM = R"rawliteral(
     </style>
 </head>
 <script>
-  
+
     function openNav() {
         document.getElementById("mySidenav").style.width = "250px";
     }
@@ -471,7 +471,7 @@ const char index_html[] PROGMEM = R"rawliteral(
         <a id="ctrlbtn_fan">%BUTTONPLACEHOLDERFAN%</a>
     </div>
     
-    <div style="padding-top: 20px;">
+    <div style="padding-top: 20px; padding-bottom: 20px;">
         <a href="#" onclick="getmode()" class="button button3"><i class="fas fa-sliders-h"></i>&nbsp;change mode</a>
         <a href="#" onclick="requestupdate()" class="button button2"><i class="fa fa-refresh" aria-hidden="true"></i>&nbsp;request update</a>
     </div>
@@ -1142,7 +1142,7 @@ void loop(void)
     set_temp_min = x.substring(24, 26).toInt();
     set_humi_max = x.substring(26, 28).toInt();
   }
-  //for request data via lora every 30s
+  //for request data via lora every 60s
   if (currentMillis - previousMillis_request >= interval_request)
   {
     previousMillis_request = currentMillis;

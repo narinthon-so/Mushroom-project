@@ -59,11 +59,11 @@ Public Class Mushroom
     End Sub
 
     Private Sub Button2_Click(sender As Object, e As EventArgs) Handles Button2.Click
-        SerialPort1.Write("P1")
+        SerialPort1.Write("P")
     End Sub
 
     Private Sub Button1_Click(sender As Object, e As EventArgs) Handles Button1.Click
-        SerialPort1.Write("F1")
+        SerialPort1.Write("F")
     End Sub
 
     Private Sub TextBox2_TextChanged(sender As Object, e As EventArgs)
@@ -115,7 +115,7 @@ Public Class Mushroom
     Private Sub SerialPort1_DataReceived(sender As Object, e As SerialDataReceivedEventArgs) Handles SerialPort1.DataReceived
         Dim line As String = SerialPort1.ReadLine()  'serial value
 
-        Label16.Text = line                          'debug
+        ' Label16.Text = line                          'debug
 
         Try
 
@@ -147,7 +147,7 @@ Public Class Mushroom
 
 
 
-        Label23.Text = set_humi_max 'debug
+        '  Label23.Text = set_humi_max 'debug
 
         If ctrlMode = "0" Then        'Auto mode
             Label25.Text = "AUTO"
@@ -207,7 +207,7 @@ Public Class Mushroom
 
     End Sub
 
-    Private Sub Label16_Click(sender As Object, e As EventArgs) Handles Label16.Click
+    Private Sub Label16_Click(sender As Object, e As EventArgs)
 
     End Sub
 
@@ -223,7 +223,7 @@ Public Class Mushroom
 
     End Sub
 
-    Private Sub Label23_Click(sender As Object, e As EventArgs) Handles Label23.Click
+    Private Sub Label23_Click(sender As Object, e As EventArgs)
 
     End Sub
 
@@ -242,16 +242,16 @@ Public Class Mushroom
     End Sub
 
     Private Sub Button7_Click(sender As Object, e As EventArgs) Handles Button7.Click
-        SerialPort1.Write("P0")
+        SerialPort1.Write("P")
     End Sub
 
     Private Sub Button6_Click(sender As Object, e As EventArgs) Handles Button6.Click
-        SerialPort1.Write("F0")
+        SerialPort1.Write("F")
     End Sub
 
     Private Sub TextBox1_TextChanged(sender As Object, e As EventArgs)
 
-        LabelDebug.Text = TextBox1.Text
+        'LabelDebug.Text = TextBox1.Text
 
     End Sub
 

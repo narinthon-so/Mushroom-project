@@ -2,7 +2,7 @@
 
 #include "heltec.h"
 #include <EEPROM.h>
-#include <Wire.h>
+//#include <Wire.h>
 #include <LiquidCrystal_I2C.h>
 
 LiquidCrystal_I2C lcd(0x27, 16, 2);
@@ -15,13 +15,13 @@ LiquidCrystal_I2C lcd(0x27, 16, 2);
 #define pump 33
 #define fan 4
 
-#define R_sensing_pump 25
+#define R_sensing_pump 34
 #define R_sensing_fan 35
 int adc_pump_value, adc_fan_value = 0;
 float Rs_pump_voltage, Rs_fan_voltage = 0;
 bool pump_check, fan_check;
-int last_pump_check = pump_check;
-int last_fan_check = fan_check;
+bool last_pump_check = pump_check;
+bool last_fan_check = fan_check;
 
 bool ctrlMode = false;
 bool pumpState = false;
@@ -82,8 +82,10 @@ void setup() {
   analogReadResolution(12);
   //dht.begin();
 
-  lcd.begin();                      // initialize the lcd
-  //lcd.backlight();
+  // initialize LCD
+  lcd.init();
+  // turn on LCD backlight
+  lcd.backlight();
 
   set_temp_min = EEPROM.read(1);
   set_temp_max = EEPROM.read(0);
@@ -92,6 +94,8 @@ void setup() {
 
   int count = 0;
   while (! am2315.begin()) {
+    lcd.setCursor(0, 0);
+    lcd.print("CONNECTING AM2315");
     Serial.println("Sensor not found, check wiring & pullups!");
     delay(1000);
     count++;
@@ -121,14 +125,18 @@ void loop() {
   }
   //--------------------------------------------R sensing
   // Reading adc values
-  adc_pump_value = analogRead(R_sensing_pump);
+  for (int i = 0; i < 10; i++) {
+    adc_pump_value = adc_pump_value + analogRead(R_sensing_pump);
+  }
+  adc_pump_value = adc_pump_value / 10;
+
   adc_fan_value = analogRead(R_sensing_fan);
-  //Serial.print(adc_pump_value); Serial.print("  "); Serial.println(adc_fan_value);
+  Serial.print(adc_pump_value); Serial.print("  "); Serial.println(adc_fan_value);
 
   //calculate to voltage
   Rs_pump_voltage = (adc_pump_value * 3.3 / 4095);
   Rs_fan_voltage = (adc_fan_value * 3.3 / 4095);
-  //Serial.print(Rs_pump_voltage); Serial.print("  "); Serial.println(Rs_fan_voltage);
+  Serial.print(Rs_pump_voltage); Serial.print("  "); Serial.println(Rs_fan_voltage);
   if (Rs_pump_voltage > 0.01) {
     pump_check = true;
   } else {
@@ -433,6 +441,8 @@ void loop() {
     digitalWrite(fan, true);
   }
   //-----------------------------------------
+
+  //delay(500);
 }
 
 void loraSend(String datasend) {
@@ -443,30 +453,31 @@ void loraSend(String datasend) {
 }
 
 void sendUpdateData() { //this function will call when sumting change ...
-  //--------------------------------------------------
-  //change pumpState and fanState before sendUpdateData ***if not pumpState and fanState on webserver will not be real value
   //--------------------------------------------R sensing
   // Reading adc values
-  adc_pump_value = analogRead(R_sensing_pump);
-  adc_fan_value = analogRead(R_sensing_fan);
-  //Serial.print(adc_pump_value); Serial.print("  "); Serial.println(adc_fan_value);
-
-  //calculate to voltage
-  Rs_pump_voltage = (adc_pump_value * 3.3 / 4095);
-  Rs_fan_voltage = (adc_fan_value * 3.3 / 4095);
-  //Serial.print(Rs_pump_voltage); Serial.print("  "); Serial.println(Rs_fan_voltage);
-  if (Rs_pump_voltage > 0.01) {
-    pump_check = true;
-  } else {
-    pump_check = false;
-  }
-  if (Rs_fan_voltage > 0.10) {
-    fan_check = true;
-  } else {
-    fan_check = false;
-  }
-  //------------------------------------------------------------
-  //----------------------------------------------------
+//  for (int i = 0; i < 10; i++) {
+//    adc_pump_value = adc_pump_value + analogRead(R_sensing_pump);
+//  }
+//  adc_pump_value = adc_pump_value / 10;
+//
+//  adc_fan_value = analogRead(R_sensing_fan);
+//  //Serial.print(adc_pump_value); Serial.print("  "); Serial.println(adc_fan_value);
+//
+//  //calculate to voltage
+//  Rs_pump_voltage = (adc_pump_value * 3.3 / 4095);
+//  Rs_fan_voltage = (adc_fan_value * 3.3 / 4095);
+//  //Serial.print(Rs_pump_voltage); Serial.print("  "); Serial.println(Rs_fan_voltage);
+//  if (Rs_pump_voltage > 0.01) {
+//    pump_check = true;
+//  } else {
+//    pump_check = false;
+//  }
+//  if (Rs_fan_voltage > 0.10) {
+//    fan_check = true;
+//  } else {
+//    fan_check = false;
+//  }
+  //  //----------------------------------------------------
   LoRa.beginPacket();
   LoRa.print(String(des) + String(ipAddr));
   LoRa.print("T");

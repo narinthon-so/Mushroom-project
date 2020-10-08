@@ -8,6 +8,14 @@
 #include <string.h>
 #include <Arduino_JSON.h>
 
+//#include <Wire.h>
+#include <LiquidCrystal_I2C.h>
+LiquidCrystal_I2C lcd(0x27, 16, 2);
+
+#define sw1 12 //sw for change mode
+#define sw2 13 //sw for control pump
+#define sw3 15 //sw for control fan
+
 #define BAND 433E6 //you can set band here directly,e.g. 868E6,915E6
 #define led_check_wifi_status 2
 #include "config.h"
@@ -31,6 +39,8 @@ int set_humi_min, set_humi_max;
 bool ctrlMode;
 bool pumpState;
 bool fanState;
+
+bool pump_check, fan_check, mode_check;
 
 String line = "";
 
@@ -825,6 +835,16 @@ void setup()
   // Serial port for debugging purposes
   Serial.begin(115200);
   Heltec.begin(false /*DisplayEnable Enable*/, true /*Heltec.LoRa Disable*/, true /*Serial Enable*/, true /*PABOOST Enable*/, BAND /*long BAND*/);
+  
+  // initialize LCD
+  lcd.init();
+  // turn on LCD backlight                      
+  lcd.backlight();
+  
+  pinMode(sw1, INPUT_PULLUP);
+  pinMode(sw2, INPUT_PULLUP);
+  pinMode(sw3, INPUT_PULLUP);
+  
   pinMode(led_check_wifi_status, OUTPUT);
   digitalWrite(led_check_wifi_status, LOW);
   // Configures static IP address
@@ -837,17 +857,25 @@ void setup()
   int count = 0;
   while (WiFi.status() != WL_CONNECTED)
   {
+    lcd.setCursor(0, 0);
+    lcd.print("CONNECTING WiFi");
     Serial.println("Connecting to WiFi..");
     delay(1000);
     count++;
-    if (count == 30) {
+    if (count == 15) {
       count = 0;
-      break;
+      ESP.restart();       // คำสั่งรีเซ็ต ESP
+      //break;
     }
   }
 
   if(WiFi.status() == WL_CONNECTED){
     // Print ESP32 Local IP Address
+    lcd.clear();
+    lcd.setCursor(0, 0);
+    lcd.print("Connected to");
+    lcd.setCursor(0, 1);
+    lcd.print(String(ssid));
     Serial.print("Connected to " + String(ssid) + " ");
     Serial.println(WiFi.localIP());
     //If wifi is connected led_check_wifi_status will HIGH
@@ -1094,7 +1122,6 @@ void setup()
 
   // Start server
   server.begin();
-
   // Init and get the time
   configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
 
@@ -1103,7 +1130,26 @@ void setup()
 
 void loop(void)
 {
-
+  pump_check = pumpState;
+  fan_check = fanState;
+  mode_check = ctrlMode;
+  
+  if (digitalRead (sw1) == 0) {
+    while (digitalRead (sw1) == 0);
+    delay(200);
+    loraSend (node1 + "M");
+  }
+  if (digitalRead (sw2) == 0) {
+    while (digitalRead (sw2) == 0);
+    delay(200);
+    loraSend (node1 + "P");
+  }
+  if (digitalRead (sw3) == 0) {
+    while (digitalRead (sw3) == 0);
+    delay(200);
+    loraSend (node1 + "F");
+  }
+  
   unsigned long currentMillis = millis();
   
   while (Serial.available())
@@ -1119,6 +1165,9 @@ void loop(void)
     // received a packet
     //Serial.print("Received packet '");
     // read packet
+    lcd.clear();
+    lcd.setCursor(0, 0);
+    lcd.print("Lora Received...");
     while (LoRa.available())
     {
       if (LoRa.find(ipAddr))
@@ -1142,6 +1191,7 @@ void loop(void)
     set_temp_min = x.substring(24, 26).toInt();
     set_humi_max = x.substring(26, 28).toInt();
   }
+
   //for request data via lora every 60s
   if (currentMillis - previousMillis_request >= interval_request)
   {
@@ -1154,6 +1204,27 @@ void loop(void)
   {
     previousMillis_vb = currentMillis;
     Serial.println(dataForVB);
+    lcd.clear();
+    lcd.setCursor(0, 0);
+    lcd.print("T:");
+    lcd.print(temp);
+    lcd.setCursor(0, 1);
+    lcd.print("H:");
+    lcd.print(humi);
+    lcd.setCursor(12, 0);
+    lcd.print("MODE");
+    lcd.setCursor(12, 1);
+    if (ctrlMode) {
+      lcd.print("MAN ");
+    } else {
+      lcd.print("AUTO");
+    }
+    lcd.setCursor(8, 0);
+    lcd.print("P:");
+    lcd.print(pumpState);
+    lcd.setCursor(8, 1);
+    lcd.print("F:");
+    lcd.print(fanState);
   }
 
   /*//for insert data into database server
@@ -1222,4 +1293,26 @@ void loop(void)
     loraSend(node1 + "J" + inputMessage);
   }
   inputParam = "";
+
+  if (pump_check != pumpState) {
+    if(pumpState)
+      NotifyLine("PUMP: ON");
+    else
+      NotifyLine("PUMP: OFF");
+  }
+  if (fan_check != fanState) {
+    if(fanState)
+      NotifyLine("FAN: ON");
+    else
+      NotifyLine("FAN: OFF");
+  }
+  if (mode_check != ctrlMode) {
+    if(ctrlMode)
+      NotifyLine("MODE: MANUAL");
+    else
+      NotifyLine("MODE: AUTO");
+  }
+  pump_check = pumpState;
+  fan_check = fanState;
+  mode_check = ctrlMode;
 }

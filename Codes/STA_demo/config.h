@@ -1,13 +1,13 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 // Replace with your network credentials
-const char* ssid = "ASUS"; //Router_2.4GHz  ASUS
-const char* password = "123456789";  //593321Ab       123456789
+const char* ssid = "TP-LINK_0AAF8C"; //Router_2.4GHz  ASUS  TP-LINK_0AAF8C
+const char* password = "094169265";  //593321Ab       123456789   094169265
 
 // Set your Static IP address
-IPAddress local_IP(192, 168, 43, 100);
+IPAddress local_IP(192, 168, 0, 100);
 // Set your Gateway IP address
-IPAddress gateway(192, 168, 43, 229);
+IPAddress gateway(192, 168, 0, 1);
 
 IPAddress subnet(255, 255, 255, 0);
 IPAddress primaryDNS(8, 8, 8, 8);   //optional
@@ -19,7 +19,7 @@ const long  gmtOffset_sec = 21600;     //Thailand time zone
 const int   daylightOffset_sec = 3600;
 
 // variable for get ngrok public url
-const char* serverName = "http://192.168.43.181/public-url.php";
+const char* serverName = "http://192.168.0.105/public-url.php";
 
 // Keep this API Key value to be compatible with the PHP code provided in the project page.
 // If you change the apiKeyValue value, the PHP file /post-esp-data.php also needs to have the same key

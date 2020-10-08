@@ -1,4 +1,4 @@
-#define R_sensing_pump 34
+#define R_sensing_pump 25
 #define R_sensing_fan 35
 
 int adc_pump_value, adc_fan_value = 0;

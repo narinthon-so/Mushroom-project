@@ -39,8 +39,6 @@ int set_humi_min, set_humi_max;
 bool ctrlMode;
 bool pumpState;
 bool fanState;
-float lux;
-int set_lux;
 
 bool pump_check, fan_check, mode_check;
 
@@ -1181,7 +1179,7 @@ void loop(void)
       if (LoRa.find(ipAddr))
       { // ip address this device "
         x = LoRa.readString();
-        dataForVB = x.substring(2, 39);  //28
+        dataForVB = x.substring(2, 28);
         Serial.println(dataForVB);
       }
     }
@@ -1198,8 +1196,6 @@ void loop(void)
     fanState = x.substring(23, 24).toInt();
     set_temp_min = x.substring(24, 26).toInt();
     set_humi_max = x.substring(26, 28).toInt();
-    lux = x.substring(30, 36).toFloat();
-    set_lux = x.substring(37, 39).toFloat();
   }
 
   //for request data via lora every 60s

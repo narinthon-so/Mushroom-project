@@ -15,6 +15,27 @@ LiquidCrystal_I2C lcd(0x27, 16, 2);
 #define pump 33
 #define fan 4
 
+//*************************************************************************//
+// These constants, define values needed for the LDR readings and ADC
+#define LDR_PIN                   25
+#define MAX_ADC_READING           4095
+#define ADC_REF_VOLTAGE           3.3
+#define REF_RESISTANCE            5030  // measure this for best results
+#define LUX_CALC_SCALAR           12518931
+#define LUX_CALC_EXPONENT         -1.405
+int   ldrRawData;
+float resistorVoltage, ldrVoltage;
+float ldrResistance;
+float ldrLux;
+int set_lux; //0-999
+const int ledPin = 2;
+// setting PWM properties
+const int freq = 547;
+const int ledChannel = 0;
+const int resolution = 10;
+int pwmvalue;
+//**************************************************************************//
+
 #define R_sensing_pump 34
 #define R_sensing_fan 35
 int adc_pump_value, adc_fan_value = 0;
@@ -26,6 +47,7 @@ bool last_fan_check = fan_check;
 bool ctrlMode = false;
 bool pumpState = false;
 bool fanState = false;
+bool day;
 
 const char* ipAddr = "X1";
 const char* des = "X0";
@@ -66,6 +88,12 @@ void setup() {
   digitalWrite(pump, HIGH);
   digitalWrite(fan, HIGH);
 
+  // configure LED PWM functionalitites
+  ledcSetup(ledChannel, freq, resolution);
+
+  // attach the channel to the GPIO to be controlled
+  ledcAttachPin(ledPin, ledChannel);
+
   EEPROM.begin(EEPROM_SIZE);
   Serial.begin(115200);
   Wire.begin (21, 22);   // sda= GPIO_21 /scl= GPIO_22
@@ -87,10 +115,31 @@ void setup() {
   // turn on LCD backlight
   lcd.backlight();
 
+  //  EEPROM.write(2, 2);
+  //  EEPROM.write(3, 0);
+  //  EEPROM.write(4, 0);
+  //  EEPROM.commit();
+
   set_temp_min = EEPROM.read(1);
   set_temp_max = EEPROM.read(0);
   set_humi_min = EEPROM.read(10);
   set_humi_max = EEPROM.read(9);
+  day = EEPROM.read(20);
+
+  int I, II, III;
+  I = EEPROM.read(2);
+  II = EEPROM.read(3);
+  III = EEPROM.read(4);
+
+  //  Serial.println(I);
+  //  Serial.println(II);
+  //  Serial.println(III);
+
+  if (I == 0) {
+    set_lux = (String(II) + String(III)).toInt();
+  } else {
+    set_lux = (String(I) + String(II) + String(III)).toInt();
+  }
 
   int count = 0;
   while (! am2315.begin()) {
@@ -99,7 +148,7 @@ void setup() {
     Serial.println("Sensor not found, check wiring & pullups!");
     delay(1000);
     count++;
-    if (count == 30) {
+    if (count == 15) {
       count = 0;
       break;
     }
@@ -123,7 +172,56 @@ void loop() {
     }
     sendUpdateData();
   }
-  //--------------------------------------------R sensing
+
+  //********************************* LDR Lux Meter *******************************
+  // Perform the analog to digital conversion
+  ldrRawData = analogRead(LDR_PIN);
+
+  // RESISTOR VOLTAGE_CONVERSION
+  // Convert the raw digital data back to the voltage that was measured on the analog pin
+  resistorVoltage = (float)ldrRawData / MAX_ADC_READING * ADC_REF_VOLTAGE;
+
+  // voltage across the LDR is the 3.3V supply minus the 5k resistor voltage
+  ldrVoltage = ADC_REF_VOLTAGE - resistorVoltage;
+
+  // LDR_RESISTANCE_CONVERSION
+  // resistance that the LDR would have for that voltage
+  ldrResistance = ldrVoltage / resistorVoltage * REF_RESISTANCE;
+
+  // LDR_LUX
+  // Change the code below to the proper conversion from ldrResistance to
+  // ldrLux
+  ldrLux = LUX_CALC_SCALAR * pow(ldrResistance, LUX_CALC_EXPONENT);
+
+  if (day) {
+    if (ldrLux < set_lux) {
+      if (pwmvalue < 100) {
+        pwmvalue++;
+      }
+      if (pwmvalue == 100) {
+        pwmvalue = 100;
+      }
+    }
+    else if (ldrLux > set_lux) {
+      if (pwmvalue > 0) {
+        pwmvalue--;
+      }
+      if (pwmvalue == 0) {
+        pwmvalue = 0;
+      }
+    }
+    ledcWrite(ledChannel, pwm(pwmvalue));
+  }
+
+  // print out the results
+//  Serial.print("LDR Raw Data   : "); Serial.println(ldrRawData);
+//  Serial.print("LDR Voltage    : "); Serial.print(ldrVoltage); Serial.println(" volts");
+//  Serial.print("LDR Resistance : "); Serial.print(ldrResistance); Serial.println(" Ohms");
+//  Serial.print("LDR Illuminance: "); Serial.print(ldrLux); Serial.println(" lux");
+//  Serial.println(pwmvalue);
+  //*****************************************************************************
+
+  //R sensing ************************************************************************
   // Reading adc values
   for (int i = 0; i < 10; i++) {
     adc_pump_value = adc_pump_value + analogRead(R_sensing_pump);
@@ -137,12 +235,12 @@ void loop() {
   Rs_pump_voltage = (adc_pump_value * 3.3 / 4095);
   Rs_fan_voltage = (adc_fan_value * 3.3 / 4095);
   //Serial.print(Rs_pump_voltage); Serial.print("  "); Serial.println(Rs_fan_voltage);
-  if (Rs_pump_voltage > 0.01) {
+  if (Rs_pump_voltage >= 0.01) {
     pump_check = true;
   } else {
     pump_check = false;
   }
-  if (Rs_fan_voltage > 0.10) {
+  if (Rs_fan_voltage >= 0.10) {
     fan_check = true;
   } else {
     fan_check = false;
@@ -157,12 +255,14 @@ void loop() {
     sendUpdateData();
   }
   last_fan_check = fan_check;
-  //------------------------------------------------------------
+  //***************************************************************************
 
   //  temp = dht.readTemperature();
   //  humi = dht.readHumidity();
   am2315.readTemperatureAndHumidity(&temp, &humi);
-  //serial ----------------------------------------------------------------------
+  //*****************************************************************************
+  
+  //serial **********************************************************************
   while (Serial.available()) { //Serial from VB
     char  i = Serial.read();
     line += i;
@@ -224,13 +324,37 @@ void loop() {
       fanState = false;
     }
     sendUpdateData();
+  } else if (Head == "L") {
+    int serial_lux = line.substring(1, 4).toInt();
+    set_lux = serial_lux;
+    if (set_lux < 100) {
+      String set_luxstr = String(set_lux);
+      int I, II, III;
+      I = 0;
+      II = set_luxstr.substring(0, 1).toInt();
+      III = set_luxstr.substring(1, 2).toInt();
+      EEPROM.write(2, I);
+      EEPROM.write(3, II);
+      EEPROM.write(4, III);
+      EEPROM.commit();
+    } else {
+      String set_luxstr = String(set_lux);
+      int I, II, III;
+      I = set_luxstr.substring(0, 1).toInt();
+      II = set_luxstr.substring(1, 2).toInt();
+      III = set_luxstr.substring(2, 3).toInt();
+      EEPROM.write(2, I);
+      EEPROM.write(3, II);
+      EEPROM.write(4, III);
+      EEPROM.commit();
+    }
+    sendUpdateData();
   }
   //reset line value
   line = "";
-
-
-
-  //LoRa--------------------------------------------------------------
+  //*****************************************************************************
+  
+  //LoRa ************************************************************************
   if (LoRa.parsePacket()) {
     // received a packet
     // Serial.print("Received packet '");
@@ -295,19 +419,55 @@ void loop() {
           }
           sendUpdateData();
         }
+        else if (head == "D") {
+          int dta = x.substring(1, 2).toInt();
+          if (dta) {
+            day = true;
+          } else {
+            day = false;
+          }
+          EEPROM.write(20, day);
+          EEPROM.commit();
+          sendUpdateData();
+        }
+        else if (head == "L") {
+          int lora_lux = x.substring(1, 4).toInt();
+          set_lux = lora_lux;
+          if (set_lux < 100) {
+            String set_luxstr = String(set_lux);
+            int I, II, III;
+            I = 0;
+            II = set_luxstr.substring(0, 1).toInt();
+            III = set_luxstr.substring(1, 2).toInt();
+            EEPROM.write(2, I);
+            EEPROM.write(3, II);
+            EEPROM.write(4, III);
+            EEPROM.commit();
+          } else {
+            String set_luxstr = String(set_lux);
+            int I, II, III;
+            I = set_luxstr.substring(0, 1).toInt();
+            II = set_luxstr.substring(1, 2).toInt();
+            III = set_luxstr.substring(2, 3).toInt();
+            EEPROM.write(2, I);
+            EEPROM.write(3, II);
+            EEPROM.write(4, III);
+            EEPROM.commit();
+          }
+          sendUpdateData();
+        }
         else if (head == "R") {
 
           sendUpdateData();
         }
-
       }
     }
     // print RSSI of packet
     // Serial.print("' with RSSI ");
     // Serial.println(LoRa.packetRssi());
   }
-
-  //check mode-------------------------------------------------------------
+  //************************************************************************
+  //check mode ****************************************************************
   if (ctrlMode == false) { // auto mode
     //temperature and humidity control
     if (temp < set_temp_min && humi < set_humi_min) {
@@ -424,6 +584,23 @@ void loop() {
     lcd.print(fan_check);
     Serial.print(set_temp_min);
     Serial.print(set_humi_max);
+    Serial.print("L");
+    if (ldrLux < 10.00) {
+      Serial.print("000" + String(ldrLux));
+    }
+    else if (ldrLux < 100.00) {
+      Serial.print("00" + String(ldrLux));
+    }
+    else if (ldrLux < 1000.00) {
+      Serial.print("0" + String(ldrLux));
+    } else {
+      Serial.print(ldrLux);
+    }
+    if (set_lux < 100) {
+      Serial.print("0" + String(set_lux));
+    } else {
+      Serial.print(set_lux);
+    }
     Serial.println();
   }
 
@@ -505,5 +682,29 @@ void sendUpdateData() { //this function will call when sumting change ...
   LoRa.print(fan_check);
   LoRa.print(set_temp_min);
   LoRa.print(set_humi_max);
+  LoRa.print("L");
+  if (ldrLux < 10.00) {
+    LoRa.print("000" + String(ldrLux));
+  }
+  else if (ldrLux < 100.00) {
+    LoRa.print("00" + String(ldrLux));
+  }
+  else if (ldrLux < 1000.00) {
+    LoRa.print("0" + String(ldrLux));
+  } else {
+    LoRa.print(ldrLux);
+  }
+  if (set_lux < 100) {
+    LoRa.print("0" + String(set_lux));
+  } else {
+    LoRa.print(set_lux);
+  }
   LoRa.endPacket();
+}
+
+int pwm(int x) {
+  //pwm function need input 0-100% pwm signal
+  int y;
+  y = 1023 * x / 100;
+  return y;
 }

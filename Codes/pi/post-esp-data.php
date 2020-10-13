@@ -13,17 +13,19 @@ $password = "keybale321";
 // If you change this value, the ESP32 sketch needs to match
 $api_key_value = "tPmAT5Ab3j7F9";
 
-$api_key = $temp = $humi = $temp_limit_min = $temp_limit_max = $humi_limit_min = $humi_limit_max = $ctrl_mode = $pump_state = $fan_state = "";
+$api_key = $temp = $humi = $temp_limit_min = $temp_limit_max = $humi_limit_min = $humi_limit_max = $ctrl_mode = $pump_state = $fan_state = $lux = $set_lux = "";
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $api_key = test_input($_POST["api_key"]);
     if($api_key == $api_key_value) {
         $temp = test_input($_POST["temp"]);
         $humi = test_input($_POST["humi"]);
+        $lux = test_input($_POST["lux"]);
         $temp_limit_min = test_input($_POST["temp_limit_min"]);
         $temp_limit_max = test_input($_POST["temp_limit_max"]);
         $humi_limit_min = test_input($_POST["humi_limit_min"]);
         $humi_limit_max = test_input($_POST["humi_limit_max"]);
+        $set_lux = test_input($_POST["set_lux"]);
         $ctrl_mode = test_input($_POST["ctrl_mode"]);
         $pump_state = test_input($_POST["pump_state"]);
         $fan_state = test_input($_POST["fan_state"]);
@@ -35,8 +37,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             die("Connection failed: " . $conn->connect_error);
         } 
         
-        $sql = "INSERT INTO SensorData (temp, humi, temp_limit_min, temp_limit_max, humi_limit_min, humi_limit_max, ctrl_mode, pump_state, fan_state)
-        VALUES ('" . $temp . "', '" . $humi . "', '" . $temp_limit_min . "', '" . $temp_limit_max . "', '" . $humi_limit_min . "', '" . $humi_limit_max . "', '" . $ctrl_mode . "', '" . $pump_state . "', '" . $fan_state . "')";
+        $sql = "INSERT INTO SensorData (temp, humi, lux, temp_limit_min, temp_limit_max, humi_limit_min, humi_limit_max, set_lux, ctrl_mode, pump_state, fan_state)
+        VALUES ('" . $temp . "', '" . $humi . "', '" . $lux . "', '" . $temp_limit_min . "', '" . $temp_limit_max . "', '" . $humi_limit_min . "', '" . $humi_limit_max . "', '" . $set_lux . "', '" . $ctrl_mode . "', '" . $pump_state . "', '" . $fan_state . "')";
         
         if ($conn->query($sql) === TRUE) {
             echo "New record created successfully";

@@ -50,14 +50,14 @@ include 'connect.php';
     //echo $cerrent_date;
     //$sql = "SELECT id, temp, humi, save_time FROM SensorData ORDER BY save_time DESC LIMIT 24"; //ASC||DESC
     //defalt sql search by cerrent date
-    $sql = "SELECT id, temp, humi, save_time FROM SensorData WHERE save_time LIKE '" . $cerrent_date . "%' ORDER BY save_time DESC";
+    $sql = "SELECT id, temp, humi, lux, save_time FROM SensorData WHERE save_time LIKE '" . $cerrent_date . "%' ORDER BY save_time DESC";
 
     // Date filter
     if (isset($_POST['btn_search'])) {
         $searchDate = $_POST['searchDate'];
         //echo $searchDate;
         if (!empty($searchDate)) {
-            $sql = "SELECT id, temp, humi, save_time FROM SensorData WHERE save_time LIKE '" . $searchDate . "%' ORDER BY save_time DESC";
+            $sql = "SELECT id, temp, humi, lux, save_time FROM SensorData WHERE save_time LIKE '" . $searchDate . "%' ORDER BY save_time DESC";
         }
     }
 
@@ -71,6 +71,7 @@ include 'connect.php';
 
     $temp = json_encode(array_reverse(array_column($sensor_data, 'temp')), JSON_NUMERIC_CHECK);
     $humi = json_encode(array_reverse(array_column($sensor_data, 'humi')), JSON_NUMERIC_CHECK);
+    $lux = json_encode(array_reverse(array_column($sensor_data, 'lux')), JSON_NUMERIC_CHECK);
     $save_time = json_encode(array_reverse($save_time), JSON_NUMERIC_CHECK);
 
     $result->free();
@@ -79,9 +80,11 @@ include 'connect.php';
 
     <div id="chart-temperature" class="container"></div>
     <div id="chart-humidity" class="container"></div>
+    <div id="chart-light" class="container"></div>
     <script>
         var temp = <?php echo $temp; ?>;
         var humi = <?php echo $humi; ?>;
+        var lux = <?php echo $lux; ?>;
         var save_time = <?php echo $save_time; ?>;
 
         var chartT = new Highcharts.Chart({
@@ -103,7 +106,7 @@ include 'connect.php';
                     }
                 },
                 series: {
-                    color: '#059e8a'
+                    color: '#DE2105'
                 }
             },
             xAxis: {
@@ -138,6 +141,9 @@ include 'connect.php';
                     dataLabels: {
                         enabled: true
                     }
+                },
+                series: {
+                    color: '#00add6'
                 }
             },
             xAxis: {
@@ -148,6 +154,43 @@ include 'connect.php';
             yAxis: {
                 title: {
                     text: 'Humidity (%)'
+                }
+            },
+            credits: {
+                enabled: false
+            }
+        });
+
+        var chartL = new Highcharts.Chart({
+            chart: {
+                renderTo: 'chart-light'
+            },
+            title: {
+                text: 'Mushroom Light'
+            },
+            series: [{
+                showInLegend: false,
+                data: lux
+            }],
+            plotOptions: {
+                line: {
+                    animation: false,
+                    dataLabels: {
+                        enabled: true
+                    },
+                    series: {
+                    color: '#e47025'
+                }
+                }
+            },
+            xAxis: {
+                type: 'datetime',
+                //dateTimeLabelFormats: { second: '%H:%M:%S' },
+                categories: save_time
+            },
+            yAxis: {
+                title: {
+                    text: 'Light (lx)'
                 }
             },
             credits: {

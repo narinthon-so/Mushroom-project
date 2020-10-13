@@ -111,12 +111,14 @@ include 'connect.php';
     echo '<table class="table1">';
     echo '<tr> 
         <th>ID</th> 
-        <th>Temperature</th> 
-        <th>Humidity</th> 
+        <th>Temperature (*c)</th> 
+        <th>Humidity (%)</th>
+        <th>Light (lx)</th> 
         <th>Temp Limit Min</th> 
         <th>Temp Limit Max</th>
         <th>Humi Limit Min</th> 
-        <th>Humi Limit Max</th> 
+        <th>Humi Limit Max</th>
+        <th>Set Light (lx)</th> 
         <th>Ctrl Mode</th> 
         <th>Pump State</th> 
         <th>Fan State</th> 
@@ -129,10 +131,12 @@ include 'connect.php';
             $row_id = $row["id"];
             $row_temp = $row["temp"];
             $row_humi = $row["humi"];
+            $row_lux = $row["lux"];
             $row_temp_limit_min = $row["temp_limit_min"];
             $row_temp_limit_max = $row["temp_limit_max"];
             $row_humi_limit_min = $row["humi_limit_min"];
             $row_humi_limit_max = $row["humi_limit_max"];
+            $row_set_lux = $row["set_lux"];
             $row_ctrl_mode = $row["ctrl_mode"];
             $row_pump_state = $row["pump_state"];
             $row_fan_state = $row["fan_state"];
@@ -147,10 +151,12 @@ include 'connect.php';
                 <td>' . $row_id . '</td> 
                 <td>' . $row_temp . '</td> 
                 <td>' . $row_humi . '</td> 
+                <td>' . $row_lux . '</td>
                 <td>' . $row_temp_limit_min . '</td> 
                 <td>' . $row_temp_limit_max . '</td>
                 <td>' . $row_humi_limit_min . '</td>
                 <td>' . $row_humi_limit_max . '</td>
+                <td>' . $row_set_lux . '</td>
                 <td>' . $row_ctrl_mode . '</td>
                 <td>' . $row_pump_state . '</td>
                 <td>' . $row_fan_state . '</td>    

@@ -38,8 +38,8 @@ int pwmvalue;
 
 #define R_sensing_pump 34
 #define R_sensing_fan 35
-int adc_pump_value, adc_fan_value = 0;
-float Rs_pump_voltage, Rs_fan_voltage = 0;
+int adc_pump_value, adc_fan_value;
+float Rs_pump_voltage, Rs_fan_voltage;
 bool pump_check, fan_check;
 bool last_pump_check = pump_check;
 bool last_fan_check = fan_check;
@@ -211,14 +211,15 @@ void loop() {
       }
     }
     ledcWrite(ledChannel, pwm(pwmvalue));
+    //Serial.println(day);
   }
 
   // print out the results
-//  Serial.print("LDR Raw Data   : "); Serial.println(ldrRawData);
-//  Serial.print("LDR Voltage    : "); Serial.print(ldrVoltage); Serial.println(" volts");
-//  Serial.print("LDR Resistance : "); Serial.print(ldrResistance); Serial.println(" Ohms");
-//  Serial.print("LDR Illuminance: "); Serial.print(ldrLux); Serial.println(" lux");
-//  Serial.println(pwmvalue);
+  //  Serial.print("LDR Raw Data   : "); Serial.println(ldrRawData);
+  //  Serial.print("LDR Voltage    : "); Serial.print(ldrVoltage); Serial.println(" volts");
+  //  Serial.print("LDR Resistance : "); Serial.print(ldrResistance); Serial.println(" Ohms");
+  //  Serial.print("LDR Illuminance: "); Serial.print(ldrLux); Serial.println(" lux");
+  //  Serial.println(pwmvalue);
   //*****************************************************************************
 
   //R sensing ************************************************************************
@@ -261,7 +262,7 @@ void loop() {
   //  humi = dht.readHumidity();
   am2315.readTemperatureAndHumidity(&temp, &humi);
   //*****************************************************************************
-  
+
   //serial **********************************************************************
   while (Serial.available()) { //Serial from VB
     char  i = Serial.read();
@@ -353,7 +354,7 @@ void loop() {
   //reset line value
   line = "";
   //*****************************************************************************
-  
+
   //LoRa ************************************************************************
   if (LoRa.parsePacket()) {
     // received a packet
@@ -456,8 +457,10 @@ void loop() {
           }
           sendUpdateData();
         }
+        else if (head == "Z") {
+          ESP.restart();       // คำสั่งรีเซ็ต ESP
+        }
         else if (head == "R") {
-
           sendUpdateData();
         }
       }
@@ -477,8 +480,8 @@ void loop() {
       pumpState = false; fanState = false;
     }
     if (temp < set_temp_min && humi > set_humi_max) {
-      pumpState = false; //fanState = true;
-      fanState = false;
+      pumpState = false; fanState = true;
+      //fanState = false;
     }
     if ((temp >= set_temp_min && temp <= set_temp_max) && humi < set_humi_min) {
       pumpState = true; fanState = false;
@@ -487,17 +490,17 @@ void loop() {
       pumpState = false; fanState = false;
     }
     if ((temp >= set_temp_min && temp <= set_temp_max) && humi > set_humi_max) {
-      pumpState = false; //fanState = true;
-      fanState = false;
+      pumpState = false; fanState = true;
+      //fanState = false;
     }
     if (temp > set_temp_max && humi < set_humi_min) {
       pumpState = true; fanState = true;
     }
     if (temp > set_temp_max && (humi >= set_humi_min && humi <= set_humi_max)) {
-      pumpState = false; fanState = true;
+      pumpState = true; fanState = true;
     }
     if (temp > set_temp_max && humi > set_humi_max) {
-      pumpState = false; fanState = true;
+      pumpState = true; fanState = true;
     }
   }
   else if (ctrlMode == true) { // manual mode

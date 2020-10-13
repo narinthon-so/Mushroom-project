@@ -44,6 +44,10 @@ int set_lux;
 
 bool pump_check, fan_check, mode_check;
 
+//****************** LINE NOTIFY SETTING ******************************
+bool line_notify_mode = true, line_notify_db = true, line_notify_onoff = true;
+//*********************************************************************
+
 String line = "";
 
 String inputMessage;
@@ -54,6 +58,7 @@ const char *PARAM_INPUT_1 = "input1"; //temp Max
 const char *PARAM_INPUT_3 = "input3"; //temp Min
 const char *PARAM_INPUT_2 = "input2"; //humi Min
 const char *PARAM_INPUT_4 = "input4"; //humi Max
+const char *PARAM_INPUT_5 = "input5"; //SET LUX
 
 //const char *_PARAM_INPUT_1 = "output";
 //const char *_PARAM_INPUT_2 = "state";
@@ -215,7 +220,8 @@ const char index_html[] PROGMEM = R"rawliteral(
         var xhttp = new XMLHttpRequest();
           xhttp.onreadystatechange = function () {
             if (this.readyState == 4 && this.status == 200) {
-                alert(this.responseText);
+                var txt = this.responseText
+                tempAlert(txt,1000)
             }
         };
           xhttp.open("GET", "/M", true);
@@ -226,7 +232,8 @@ const char index_html[] PROGMEM = R"rawliteral(
         var xhttp = new XMLHttpRequest();
           xhttp.onreadystatechange = function () {
             if (this.readyState == 4 && this.status == 200) {
-                alert(this.responseText);
+                var txt = this.responseText
+                tempAlert(txt,1000)
             }
         };
           xhttp.open("GET", "/requestupdate", true);
@@ -238,7 +245,8 @@ const char index_html[] PROGMEM = R"rawliteral(
       var xhr = new XMLHttpRequest();
           xhr.onreadystatechange = function () {
             if (this.readyState == 4 && this.status == 200) {
-                alert(this.responseText);
+                var txt = this.responseText
+                tempAlert(txt,1000)
             }
         };
         if(element.checked){ xhr.open("GET", "/P", true); }
@@ -250,7 +258,8 @@ const char index_html[] PROGMEM = R"rawliteral(
       var xhr = new XMLHttpRequest();
           xhr.onreadystatechange = function () {
             if (this.readyState == 4 && this.status == 200) {
-                alert(this.responseText);
+                var txt = this.responseText
+                tempAlert(txt,1000)
             }
         };
         if(element.checked){ xhr.open("GET", "/F", true); }
@@ -378,6 +387,38 @@ const char index_html[] PROGMEM = R"rawliteral(
         xhttp.open("GET", "/mode", true);
         xhttp.send();
     }, 5000);
+
+    setInterval(function () {
+        var xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function () {
+            if (this.readyState == 4 && this.status == 200) {
+                document.getElementById("light").innerHTML = this.responseText;
+            }
+        };
+        xhttp.open("GET", "/light", true);
+        xhttp.send();
+    }, 5000);
+
+    setInterval(function () {
+        var xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function () {
+            if (this.readyState == 4 && this.status == 200) {
+                document.getElementById("setlight").innerHTML = this.responseText;
+            }
+        };
+        xhttp.open("GET", "/setlight", true);
+        xhttp.send();
+    }, 5000);
+
+    function tempAlert(msg,duration) {
+      var el = document.createElement("div");
+      el.setAttribute("style","position:absolute;top:40%;left:20%;background-color:white;");
+      el.innerHTML = msg;
+      setTimeout(function(){
+        el.parentNode.removeChild(el);
+        },duration);
+        document.body.appendChild(el);
+    }
      
 </script>
 </script>
@@ -431,7 +472,7 @@ const char index_html[] PROGMEM = R"rawliteral(
 
     <h2 style="margin-top: 0px;">Mushroom Web Server</h2>
     <div class="text">
-        <i class="fas fa-thermometer-half" style="color:#059e8a;"></i>
+        <i class="fas fa-thermometer-half" style="color:#DE2105;"></i>
         <span class="labels">Temperature</span>
         <span id="temperature">%TEMPERATURE%</span>
         <sup class="units" style="font-weight:bold; font-size:1.5rem;">&deg;C</sup>
@@ -459,7 +500,18 @@ const char index_html[] PROGMEM = R"rawliteral(
         <span id="humiditylimitmax" class="text2">%HUMIDITYLIMITMAX%</span>
         <sup class="units"><i class="fas fa-percent"></i></sup>
     </div>
+    
+    <div class="text" style="padding-top: 25px;">
+        <i class="fas fa-lightbulb" style="color:#e47025;"></i>
+        <span class="labels">Light</span>
+        <span id="light">%LIGHT%</span>
+        <sup class="units" style="font-weight:bold; font-size:1.5rem;">lx</sup>
 
+        <br><span class="labels">Set Light</span>
+        <span id="setlight" class="text2">%SETLIGHT%</span>
+        <sup class="units" style="font-weight:bold; font-size:1.5rem;">lx</sup>
+    </div>
+    
     <div class="text" style="padding-top: 25px;">
         <i class="fas fa-shower" style="color:#00add6;"></i>
         <span class="labels">Pump</span>
@@ -515,28 +567,129 @@ const char setting_html[] PROGMEM = R"rawliteral(
         body {
             text-align: center;
         }
+        .switch {position: relative; display: inline-block; width: 120px; height: 68px} 
+        .switch input {display: none}
+        .slider {position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; border-radius: 6px}
+        .slider:before {position: absolute; content: ""; height: 52px; width: 52px; left: 8px; bottom: 8px; background-color: #fff; -webkit-transition: .4s; transition: .4s; border-radius: 3px}
+        input:checked+.slider {background-color: #b30000}
+        input:checked+.slider:before {-webkit-transform: translateX(52px); -ms-transform: translateX(52px); transform: translateX(52px)}
     </style>
 </head>
+<script>
 
+    function toggleCheckbox_mode(element) {
+      var xhr = new XMLHttpRequest();
+          xhr.onreadystatechange = function () {
+            if (this.readyState == 4 && this.status == 200) {
+               var txt = this.responseText;
+               tempAlert(txt,1000);
+            }
+        };
+        if(element.checked){ xhr.open("GET", "/toggle_line_mode", true); }
+        else { xhr.open("GET", "/toggle_line_mode", true); }
+        xhr.send();
+    }
+
+    function toggleCheckbox_db(element) {
+      var xhr = new XMLHttpRequest();
+          xhr.onreadystatechange = function () {
+            if (this.readyState == 4 && this.status == 200) {
+               var txt = this.responseText;
+               tempAlert(txt,1000);
+            }
+        };
+        if(element.checked){ xhr.open("GET", "/toggle_line_db", true); }
+        else { xhr.open("GET", "/toggle_line_db", true); }
+        xhr.send();
+    }
+
+    function toggleCheckbox_onoff(element) {
+      var xhr = new XMLHttpRequest();
+          xhr.onreadystatechange = function () {
+            if (this.readyState == 4 && this.status == 200) {
+               var txt = this.responseText;
+               tempAlert(txt,1000);
+            }
+        };
+        if(element.checked){ xhr.open("GET", "/toggle_line_onoff", true); }
+        else { xhr.open("GET", "/toggle_line_onoff", true); }
+        xhr.send();
+    }
+    
+    setInterval(function () {
+        var xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function () {
+            if (this.readyState == 4 && this.status == 200) {
+                document.getElementById("line_mode").innerHTML = this.responseText;
+            }
+        };
+        xhttp.open("GET", "/line_mode", true);
+        xhttp.send();
+    }, 5000);
+    
+    setInterval(function () {
+        var xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function () {
+            if (this.readyState == 4 && this.status == 200) {
+                document.getElementById("line_db").innerHTML = this.responseText;
+            }
+        };
+        xhttp.open("GET", "/line_db", true);
+        xhttp.send();
+    }, 5000);
+
+    setInterval(function () {
+        var xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function () {
+            if (this.readyState == 4 && this.status == 200) {
+                document.getElementById("line_onoff").innerHTML = this.responseText;
+            }
+        };
+        xhttp.open("GET", "/line_onoff", true);
+        xhttp.send();
+    }, 5000);
+
+    function tempAlert(msg,duration) {
+      var el = document.createElement("div");
+      el.setAttribute("style","position:absolute;top:40%;left:20%;background-color:white;");
+      el.innerHTML = msg;
+      setTimeout(function(){
+        el.parentNode.removeChild(el);
+        },duration);
+        document.body.appendChild(el);
+    }
+    
+</script>
 <body>
-    <p>Setting Temperature and Humidity Limit...</p>
+    <h3>Setting Mushroom Environment Variables</h3>
     <form action="/get">
-        Temp Limit Min: <input type="number" name="input3" min="10" max="40">
+        Temperature Min (*c): <input type="number" name="input3" min="10" max="40">
         <input type="submit" value="Submit">
     </form><br>
     <form action="/get">
-        Temp Limit Max: <input type="number" name="input1" min="10" max="40">
+        Temperature Max (*c): <input type="number" name="input1" min="10" max="40">
         <input type="submit" value="Submit">
     </form><br>
     <form action="/get">
-        Humi Limit Min: <input type="number" name="input2" min="50" max="99">
+        Humidity Min (percent): <input type="number" name="input2" min="50" max="99">
         <input type="submit" value="Submit">
     </form>
     <br>
     <form action="/get">
-        Humi Limit Max: <input type="number" name="input4" min="50" max="99">
+        Humidity Max (percent): <input type="number" name="input4" min="50" max="99">
+        <input type="submit" value="Submit">
+    </form><br>
+    <form action="/get">
+        Set Light (lx): <input type="number" name="input5" min="10" max="999">
         <input type="submit" value="Submit">
     </form>
+
+    <div>
+        <a id="line_mode">%BTNLINEMODE%</a>
+        <a id="line_db">%BTNLINEDB%</a>
+        <a id="line_onoff">%BTNLINEONOFF%</a>
+    </div>
+    
     <br><a href="/">Return to Home Page</a>
     
 </body>
@@ -556,6 +709,13 @@ String handleHumidity()
   float h = humi;
   //Serial.println(h);
   return String(h);
+}
+
+String handleLight()
+{
+  float l = lux;
+  //Serial.println(h);
+  return String(l);
 }
 //-------------------------------------------------edit
 String handleHumiditylimitMin()
@@ -581,6 +741,13 @@ String handleTemperaturelimitMax()
   float st = set_temp_max;
   //Serial.println(st);
   return String(st);
+}
+
+String handleSetlight()
+{
+  float sl = set_lux;
+  //Serial.println(h);
+  return String(sl);
 }
 //----------------------------------------------------
 String handlePump()
@@ -671,6 +838,27 @@ String ctrlbtn_fan()
     }
 }
 
+String ctrlbtn_line_mode()
+{
+      String buttons = "";
+      buttons += "<h4>Control - Line Notify Change Mode&nbsp;</h4><label class=\"switch\"><input type=\"checkbox\" onchange=\"toggleCheckbox_mode(this)\" id=\"1\" " + outputState(line_notify_mode) + "><span class=\"slider\"></span></label>";
+      return buttons;
+}
+
+String ctrlbtn_line_db()
+{
+      String buttons = "";
+      buttons += "<h4>Control - Line Notify Save Data&nbsp;</h4><label class=\"switch\"><input type=\"checkbox\" onchange=\"toggleCheckbox_db(this)\" id=\"2\" " + outputState(line_notify_db) + "><span class=\"slider\"></span></label>";
+      return buttons;
+}
+
+String ctrlbtn_line_onoff()
+{
+      String buttons = "";
+      buttons += "<h4>Control - Line Notify ON/OFF&nbsp;</h4><label class=\"switch\"><input type=\"checkbox\" onchange=\"toggleCheckbox_onoff(this)\" id=\"3\" " + outputState(line_notify_onoff) + "><span class=\"slider\"></span></label>";
+      return buttons;
+}
+
 // Replaces placeholder with DHT values
 String processor(const String &var)
 {
@@ -716,6 +904,21 @@ String processor(const String &var)
   }
   else if(var == "BUTTONPLACEHOLDERFAN"){
     return ctrlbtn_fan();
+  }
+  else if(var == "LIGHT"){
+    return handleLight();
+  }
+  else if(var == "SETLIGHT"){
+    return handleSetlight();
+  }
+  else if(var == "BTNLINEMODE"){
+    return ctrlbtn_line_mode();
+  }
+  else if(var == "BTNLINEDB"){
+    return ctrlbtn_line_db();
+  }
+  else if(var == "BTNLINEONOFF"){
+    return ctrlbtn_line_onoff();
   }
   return String();
 }
@@ -777,14 +980,21 @@ void insertDB()
     fanStateStr = "OFF";
   }
   // Prepare your HTTP POST request data
-  String httpRequestData = "api_key=" + apiKeyValue + "&temp=" + String(temp) + "&humi=" + String(humi) + "&temp_limit_min=" + String(set_temp_min) + "&temp_limit_max=" + String(set_temp_max) + "&humi_limit_min=" + String(set_humi_min) + "&humi_limit_max=" + String(set_humi_max) + "&ctrl_mode=" + ctrlModeStr + "&pump_state=" + pumpStateStr + "&fan_state=" + fanStateStr + "";
+  String httpRequestData = "api_key=" + apiKeyValue + "&temp=" + String(temp) + "&humi=" + String(humi) + "&temp_limit_min=" + String(set_temp_min) + "&temp_limit_max=" + String(set_temp_max) + "&humi_limit_min=" + String(set_humi_min) + "&humi_limit_max=" + String(set_humi_max) + "&ctrl_mode=" + ctrlModeStr + "&pump_state=" + pumpStateStr + "&fan_state=" + fanStateStr + "&lux=" + String(lux) + "&set_lux=" + String(set_lux) + "";
 
   // Send HTTP POST request
   int httpResponseCode = http.POST(httpRequestData);
-
-  NotifyLine("Saving Data into Database.\nHTTP Response code: " + String(httpResponseCode));
+  
+  if(line_notify_db){
+    NotifyLine("Saving Data into Database.\nHTTP Response code: " + String(httpResponseCode));
+  }
+  
   // Free resources
   http.end();
+
+  if(httpResponseCode == -1){
+    ESP.restart();
+  }
 }
 
 String httpGETRequest(const char *serverName)
@@ -964,6 +1174,59 @@ void setup()
       return request->requestAuthentication();
     request->send_P(200, "text/plain", ctrlbtn_fan().c_str());
   });
+  //************************ LINE NOTIFY SETTING **************************
+  server.on("/line_mode", HTTP_GET, [](AsyncWebServerRequest *request) {
+    if (!request->authenticate(http_username, http_password))
+      return request->requestAuthentication();
+    request->send_P(200, "text/plain", ctrlbtn_line_mode().c_str());
+  });
+  server.on("/line_db", HTTP_GET, [](AsyncWebServerRequest *request) {
+    if (!request->authenticate(http_username, http_password))
+      return request->requestAuthentication();
+    request->send_P(200, "text/plain", ctrlbtn_line_db().c_str());
+  });
+  server.on("/line_onoff", HTTP_GET, [](AsyncWebServerRequest *request) {
+    if (!request->authenticate(http_username, http_password))
+      return request->requestAuthentication();
+    request->send_P(200, "text/plain", ctrlbtn_line_onoff().c_str());
+  });
+  server.on("/toggle_line_mode", HTTP_GET, [](AsyncWebServerRequest *request) {
+    if (!request->authenticate(http_username, http_password))
+      return request->requestAuthentication();
+    if(line_notify_mode){
+      line_notify_mode = false;
+    }
+    else{
+      line_notify_mode = true;
+    }
+    //toggle line notify when change mode
+    request->send(200, "text/html", "toggle line notify when change mode...");                                   
+  });
+  server.on("/toggle_line_db", HTTP_GET, [](AsyncWebServerRequest *request) {
+    if (!request->authenticate(http_username, http_password))
+      return request->requestAuthentication();
+    if(line_notify_db){
+      line_notify_db = false;
+    }
+    else{
+      line_notify_db = true;
+    }
+    //toggle line notify when save data
+    request->send(200, "text/html", "toggle line notify when save data...");                                   
+  });
+  server.on("/toggle_line_onoff", HTTP_GET, [](AsyncWebServerRequest *request) {
+    if (!request->authenticate(http_username, http_password))
+      return request->requestAuthentication();
+    if(line_notify_onoff){
+      line_notify_onoff = false;
+    }
+    else{
+      line_notify_onoff = true;
+    }
+    //toggle line notify when on/off
+    request->send(200, "text/html", "toggle line notify when on/off...");                                   
+  });
+  //***********************************************************************
   server.on("/temperature", HTTP_GET, [](AsyncWebServerRequest *request) {
     if (!request->authenticate(http_username, http_password))
       return request->requestAuthentication();
@@ -974,7 +1237,11 @@ void setup()
       return request->requestAuthentication();
     request->send_P(200, "text/plain", handleHumidity().c_str());
   });
-  //------------------------------------------------------------------------------edit
+  server.on("/light", HTTP_GET, [](AsyncWebServerRequest *request) {
+    if (!request->authenticate(http_username, http_password))
+      return request->requestAuthentication();
+    request->send_P(200, "text/plain", handleLight().c_str());
+  });
   server.on("/humiditylimitmin", HTTP_GET, [](AsyncWebServerRequest *request) {
     if (!request->authenticate(http_username, http_password))
       return request->requestAuthentication();
@@ -995,7 +1262,11 @@ void setup()
       return request->requestAuthentication();
     request->send_P(200, "text/plain", handleTemperaturelimitMax().c_str());
   });
-  //-------------------------------------------------------------------------------
+  server.on("/setlight", HTTP_GET, [](AsyncWebServerRequest *request) {
+    if (!request->authenticate(http_username, http_password))
+      return request->requestAuthentication();
+    request->send_P(200, "text/plain", handleSetlight().c_str());
+  });
   server.on("/pump", HTTP_GET, [](AsyncWebServerRequest *request) {
     if (!request->authenticate(http_username, http_password))
       return request->requestAuthentication();
@@ -1056,7 +1327,7 @@ void setup()
   server.on("/setting", HTTP_GET, [](AsyncWebServerRequest *request) {
     if (!request->authenticate(http_username, http_password))
       return request->requestAuthentication();
-    request->send(200, "text/html", setting_html);
+    request->send_P(200, "text/html", setting_html, processor);
   });
 
   server.on("/F", HTTP_GET, [](AsyncWebServerRequest *request) {
@@ -1100,7 +1371,13 @@ void setup()
       inputParam = PARAM_INPUT_4;
       //loraSend(node1 + "J" + inputMessage);
     }
-
+    // GET input5 value on <ESP_IP>/get?input5=<inputMessage>
+    else if (request->hasParam(PARAM_INPUT_5))
+    {
+      inputMessage = request->getParam(PARAM_INPUT_5)->value();
+      inputParam = PARAM_INPUT_5;
+      //loraSend(node1 + "L" + inputMessage);
+    }
     else
     {
       inputMessage = "No message sent";
@@ -1198,8 +1475,34 @@ void loop(void)
     fanState = x.substring(23, 24).toInt();
     set_temp_min = x.substring(24, 26).toInt();
     set_humi_max = x.substring(26, 28).toInt();
-    lux = x.substring(30, 36).toFloat();
-    set_lux = x.substring(37, 39).toFloat();
+    String lux_raw = x.substring(29, 36);
+    String I = lux_raw.substring(0, 1);
+    String II = lux_raw.substring(0, 2);
+    String III = lux_raw.substring(0, 3);
+    //Serial.println(lux_raw);Serial.println(II);Serial.println(III);
+    if(III == "000"){
+      lux = lux_raw.substring(3, 7).toFloat();
+    }
+    else if(II == "00"){
+      lux = lux_raw.substring(2, 7).toFloat();
+    }
+    else if(I == "0"){
+      lux = lux_raw.substring(1, 7).toFloat();
+    }
+    else{
+      lux = lux_raw.toFloat();
+    }
+    //Serial.println(lux);
+    String set_lux_raw = x.substring(36, 39);
+    //Serial.println(set_lux_raw);.
+    String o = set_lux_raw.substring(0, 1);
+    if(o == "0"){
+      set_lux = set_lux_raw.substring(1, 3).toInt();
+    }
+    else{
+      set_lux = set_lux_raw.toInt();
+    }
+    //Serial.println(set_lux);
   }
 
   //for request data via lora every 60s
@@ -1242,7 +1545,7 @@ void loop(void)
     previousMillis_db = currentMillis;
       insertDB();
   }  */
-  //------------------------------------------------------------------------
+  //***********************NTP (Network Time Protocal)**********************
   //Handle local time from NTP (Network Time Protocal)
   struct tm timeinfo;
   if (!getLocalTime(&timeinfo))
@@ -1254,17 +1557,59 @@ void loop(void)
   strftime(timeSec, 3, "%S", &timeinfo); //Second
   char timeMin[3];
   strftime(timeMin, 3, "%M", &timeinfo); //Minute
-
+  char timeHour[3];
+  strftime(timeHour, 3, "%H", &timeinfo); //Hour
   //Insert data into database every 1hr etc.(12:00:00) HH:MM:SS
   const char *second_db = "00";
   const char *minute_db = "00";
+  const char *hour_day_start = "06";
+  const char *hour_day_end = "18";
+  const char *minute_reset = "30";
+  //*********************************** SAVE DATA EVERY HOUR *******************************************************************
   if (strcmp(timeSec, second_db) == 0 && strcmp(timeMin, minute_db) == 0)
   {
     insertDB();
     delay(1000);
     //Serial.println("Insert into DB...");
   }
-  //--------------------------------------------------------------------
+  //**************************************************************************************************************
+  //*********************************** DAY CHECK *******************************************************************
+  if (strcmp(timeSec, second_db) == 0 && strcmp(timeMin, minute_db) == 0 && strcmp(timeHour, hour_day_start) == 0){
+    loraSend(node1 + "D1");
+    delay(1000);
+  }
+  if (strcmp(timeSec, second_db) == 0 && strcmp(timeMin, minute_db) == 0 && strcmp(timeHour, hour_day_end) == 0){
+    loraSend(node1 + "D0");
+    delay(1000);
+  }
+  //*****************************************************************************************************************
+  //************************************ ESP MUSHROOM RESET ********************************************************************
+  if (strcmp(timeSec, second_db) == 0 && strcmp(timeMin, minute_reset) == 0)
+  {
+    loraSend(node1 + "Z");
+    delay(1000);
+  }
+  //*******************************************************************************************************************
+  /*
+  Serial.println(&timeinfo, "%A, %B %d %Y %H:%M:%S");
+  Serial.print("Day of week: ");
+  Serial.println(&timeinfo, "%A");
+  Serial.print("Month: ");
+  Serial.println(&timeinfo, "%B");
+  Serial.print("Day of Month: ");
+  Serial.println(&timeinfo, "%d");
+  Serial.print("Year: ");
+  Serial.println(&timeinfo, "%Y");
+  Serial.print("Hour: ");
+  Serial.println(&timeinfo, "%H");
+  Serial.print("Hour (12 hour format): ");
+  Serial.println(&timeinfo, "%I");
+  Serial.print("Minute: ");
+  Serial.println(&timeinfo, "%M");
+  Serial.print("Second: ");
+  Serial.println(&timeinfo, "%S");
+  */
+  //************************************************************************
 
   if (lora_ctrl_mode == true)
   {
@@ -1302,26 +1647,36 @@ void loop(void)
   {
     loraSend(node1 + "J" + inputMessage);
   }
+  if (inputParam == "input5")
+  {
+    loraSend(node1 + "L" + inputMessage);
+  }
   inputParam = "";
 
-  if (pump_check != pumpState) {
+  if (pump_check != pumpState && line_notify_onoff == true) {
     if(pumpState)
       NotifyLine("PUMP: ON");
     else
       NotifyLine("PUMP: OFF");
   }
-  if (fan_check != fanState) {
+  if (fan_check != fanState && line_notify_onoff == true) {
     if(fanState)
       NotifyLine("FAN: ON");
     else
       NotifyLine("FAN: OFF");
   }
-  if (mode_check != ctrlMode) {
+  if (mode_check != ctrlMode && line_notify_mode == true) {
     if(ctrlMode)
       NotifyLine("MODE: MANUAL");
     else
       NotifyLine("MODE: AUTO");
   }
+/*
+  Serial.println(line_notify_mode);
+  Serial.println(line_notify_db);
+  Serial.println(line_notify_onoff);
+  Serial.println();
+  */
   pump_check = pumpState;
   fan_check = fanState;
   mode_check = ctrlMode;

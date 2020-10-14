@@ -1,13 +1,13 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 // Replace with your network credentials
-const char* ssid = "Router_2.4GHz"; //Router_2.4GHz  ASUS  TP-LINK_0AAF8C
-const char* password = "593321Ab";  //593321Ab       123456789   094169265
+const char* ssid = "TP-LINK_0AAF8C"; //Router_2.4GHz  ASUS  TP-LINK_0AAF8C
+const char* password = "094169265";  //593321Ab       123456789   094169265
 
 // Set your Static IP address
-IPAddress local_IP(192, 168, 1, 100);
+IPAddress local_IP(192, 168, 0, 100);
 // Set your Gateway IP address
-IPAddress gateway(192, 168, 1, 1); //0, 1
+IPAddress gateway(192, 168, 0, 1); //0, 1
 
 IPAddress subnet(255, 255, 255, 0);
 IPAddress primaryDNS(8, 8, 8, 8);   //optional

@@ -7,7 +7,8 @@
 #include "time.h"
 #include <string.h>
 #include <Arduino_JSON.h>
-
+#include <EEPROM.h>
+#define EEPROM_SIZE 512
 //#include <Wire.h>
 #include <LiquidCrystal_I2C.h>
 LiquidCrystal_I2C lcd(0x27, 16, 2);
@@ -45,7 +46,7 @@ int set_lux;
 bool pump_check, fan_check, mode_check;
 
 //****************** LINE NOTIFY SETTING ******************************
-bool line_notify_mode = true, line_notify_db = true, line_notify_onoff = true;
+bool line_notify_mode, line_notify_db, line_notify_onoff;
 //*********************************************************************
 
 String line = "";
@@ -221,7 +222,7 @@ const char index_html[] PROGMEM = R"rawliteral(
           xhttp.onreadystatechange = function () {
             if (this.readyState == 4 && this.status == 200) {
                 var txt = this.responseText
-                tempAlert(txt,1000)
+                alert(txt);
             }
         };
           xhttp.open("GET", "/M", true);
@@ -233,7 +234,7 @@ const char index_html[] PROGMEM = R"rawliteral(
           xhttp.onreadystatechange = function () {
             if (this.readyState == 4 && this.status == 200) {
                 var txt = this.responseText
-                tempAlert(txt,1000)
+                alert(txt);
             }
         };
           xhttp.open("GET", "/requestupdate", true);
@@ -246,7 +247,7 @@ const char index_html[] PROGMEM = R"rawliteral(
           xhr.onreadystatechange = function () {
             if (this.readyState == 4 && this.status == 200) {
                 var txt = this.responseText
-                tempAlert(txt,1000)
+                alert(txt);
             }
         };
         if(element.checked){ xhr.open("GET", "/P", true); }
@@ -259,7 +260,7 @@ const char index_html[] PROGMEM = R"rawliteral(
           xhr.onreadystatechange = function () {
             if (this.readyState == 4 && this.status == 200) {
                 var txt = this.responseText
-                tempAlert(txt,1000)
+                alert(txt);
             }
         };
         if(element.checked){ xhr.open("GET", "/F", true); }
@@ -409,18 +410,7 @@ const char index_html[] PROGMEM = R"rawliteral(
         xhttp.open("GET", "/setlight", true);
         xhttp.send();
     }, 5000);
-
-    function tempAlert(msg,duration) {
-      var el = document.createElement("div");
-      el.setAttribute("style","position:absolute;top:40%;left:20%;background-color:white;");
-      el.innerHTML = msg;
-      setTimeout(function(){
-        el.parentNode.removeChild(el);
-        },duration);
-        document.body.appendChild(el);
-    }
      
-</script>
 </script>
 <body>
     <script language="javascript" type="text/javascript">
@@ -1053,6 +1043,8 @@ void setup()
   // turn on LCD backlight                      
   lcd.backlight();
   
+  EEPROM.begin(EEPROM_SIZE);
+  
   pinMode(sw1, INPUT_PULLUP);
   pinMode(sw2, INPUT_PULLUP);
   pinMode(sw3, INPUT_PULLUP);
@@ -1199,6 +1191,8 @@ void setup()
     else{
       line_notify_mode = true;
     }
+    EEPROM.write(1, line_notify_mode);
+    EEPROM.commit();
     //toggle line notify when change mode
     request->send(200, "text/html", "toggle line notify when change mode...");                                   
   });
@@ -1211,6 +1205,8 @@ void setup()
     else{
       line_notify_db = true;
     }
+    EEPROM.write(2, line_notify_db);
+    EEPROM.commit();
     //toggle line notify when save data
     request->send(200, "text/html", "toggle line notify when save data...");                                   
   });
@@ -1223,6 +1219,8 @@ void setup()
     else{
       line_notify_onoff = true;
     }
+    EEPROM.write(3, line_notify_onoff);
+    EEPROM.commit();
     //toggle line notify when on/off
     request->send(200, "text/html", "toggle line notify when on/off...");                                   
   });
@@ -1405,6 +1403,16 @@ void setup()
   configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
 
   loraSend(node1 + "R");
+  
+            EEPROM.write(1, 1);
+            EEPROM.write(2, 1);
+            EEPROM.write(3, 1);
+            EEPROM.commit();
+
+  line_notify_mode = EEPROM.read(1);
+  line_notify_db = EEPROM.read(2);
+  line_notify_onoff = EEPROM.read(3);
+  
 }
 
 void loop(void)
@@ -1562,8 +1570,11 @@ void loop(void)
   //Insert data into database every 1hr etc.(12:00:00) HH:MM:SS
   const char *second_db = "00";
   const char *minute_db = "00";
-  const char *hour_day_start = "06";
+  const char *hour_day_start = "05";
   const char *hour_day_end = "18";
+  const char *minute_day = "59";
+  const char *second_day = "50";
+  const char *second_day_end = "10";
   const char *minute_reset = "30";
   //*********************************** SAVE DATA EVERY HOUR *******************************************************************
   if (strcmp(timeSec, second_db) == 0 && strcmp(timeMin, minute_db) == 0)
@@ -1574,11 +1585,11 @@ void loop(void)
   }
   //**************************************************************************************************************
   //*********************************** DAY CHECK *******************************************************************
-  if (strcmp(timeSec, second_db) == 0 && strcmp(timeMin, minute_db) == 0 && strcmp(timeHour, hour_day_start) == 0){
+  if (strcmp(timeSec, second_day) == 0 && strcmp(timeMin, minute_day) == 0 && strcmp(timeHour, hour_day_start) == 0){
     loraSend(node1 + "D1");
     delay(1000);
   }
-  if (strcmp(timeSec, second_db) == 0 && strcmp(timeMin, minute_db) == 0 && strcmp(timeHour, hour_day_end) == 0){
+  if (strcmp(timeSec, second_day_end) == 0 && strcmp(timeMin, minute_db) == 0 && strcmp(timeHour, hour_day_end) == 0){
     loraSend(node1 + "D0");
     delay(1000);
   }

@@ -44,7 +44,7 @@ bool pump_check, fan_check;
 bool last_pump_check = pump_check;
 bool last_fan_check = fan_check;
 
-bool ctrlMode = false;
+bool ctrlMode;
 bool pumpState = false;
 bool fanState = false;
 bool day;
@@ -125,6 +125,7 @@ void setup() {
   set_humi_min = EEPROM.read(10);
   set_humi_max = EEPROM.read(9);
   day = EEPROM.read(20);
+  ctrlMode = EEPROM.read(7);
 
   int I, II, III;
   I = EEPROM.read(2);
@@ -170,6 +171,8 @@ void loop() {
     else {
       ctrlMode = false;
     }
+    EEPROM.write(7, ctrlMode);
+    EEPROM.commit();
     sendUpdateData();
   }
 
@@ -248,7 +251,7 @@ void loop() {
   }
 
   if (pump_check != last_pump_check) {
-    sendUpdateData();
+    //sendUpdateData();
   }
   last_pump_check = pump_check;
 
@@ -309,6 +312,8 @@ void loop() {
     else {
       ctrlMode = false;
     }
+    EEPROM.write(7, ctrlMode);
+    EEPROM.commit();
     sendUpdateData();
     line = "";
   } else if (Head == "P") {
@@ -378,6 +383,8 @@ void loop() {
           else {
             ctrlMode = false;
           }
+          EEPROM.write(7, ctrlMode);
+          EEPROM.commit();
           sendUpdateData();
         }
         else if (head == "Y") {
@@ -680,7 +687,8 @@ void sendUpdateData() { //this function will call when sumting change ...
   LoRa.print("M");
   LoRa.print(ctrlMode);
   LoRa.print("P");
-  LoRa.print(pump_check);
+  //LoRa.print(pump_check);
+  LoRa.print(pumpState);
   LoRa.print("F");
   LoRa.print(fan_check);
   LoRa.print(set_temp_min);

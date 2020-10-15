@@ -949,7 +949,7 @@ void NotifyLine(String t)
 void insertDB()
 {
   // Your Domain name with URL path or IP address with path
-  const String serverName = database_server_url + "/post-esp-data.php";
+  const String serverName = "http://192.168.0.105/post-esp-data.php";
   http.begin(serverName);
 
   // Specify content-type header
@@ -1404,10 +1404,10 @@ void setup()
 
   loraSend(node1 + "R");
   
-            EEPROM.write(1, 1);
-            EEPROM.write(2, 1);
-            EEPROM.write(3, 1);
-            EEPROM.commit();
+//            EEPROM.write(1, 1);
+//            EEPROM.write(2, 1);
+//            EEPROM.write(3, 1);
+//            EEPROM.commit();
 
   line_notify_mode = EEPROM.read(1);
   line_notify_db = EEPROM.read(2);

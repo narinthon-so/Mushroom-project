@@ -218,11 +218,11 @@ void loop() {
   }
 
   // print out the results
-  //  Serial.print("LDR Raw Data   : "); Serial.println(ldrRawData);
-  //  Serial.print("LDR Voltage    : "); Serial.print(ldrVoltage); Serial.println(" volts");
-  //  Serial.print("LDR Resistance : "); Serial.print(ldrResistance); Serial.println(" Ohms");
-  //  Serial.print("LDR Illuminance: "); Serial.print(ldrLux); Serial.println(" lux");
-  //  Serial.println(pwmvalue);
+//    Serial.print("LDR Raw Data   : "); Serial.println(ldrRawData);
+//    Serial.print("LDR Voltage    : "); Serial.print(ldrVoltage); Serial.println(" volts");
+//    Serial.print("LDR Resistance : "); Serial.print(ldrResistance); Serial.println(" Ohms");
+//    Serial.print("LDR Illuminance: "); Serial.print(ldrLux); Serial.println(" lux");
+//    Serial.println(pwmvalue);
   //*****************************************************************************
 
   //R sensing ************************************************************************
@@ -548,7 +548,7 @@ void loop() {
   if (currentMillis - previousMillis >= interval) {
     previousMillis = currentMillis;
     lcd.clear();
-    Serial.print("T");
+    Serial.print(F("T"));
     lcd.setCursor(0, 0);
     lcd.print("T:");
     if (temp < 10.00) {
@@ -559,7 +559,7 @@ void loop() {
       Serial.print(temp);
       lcd.print(temp);
     }
-    Serial.print("H");
+    Serial.print(F("H"));
     lcd.setCursor(0, 1);
     lcd.print("H:");
     if (humi < 10.00) {
@@ -582,19 +582,19 @@ void loop() {
     } else {
       lcd.print("AUTO");
     }
-    Serial.print("P");
+    Serial.print(F("P"));
     lcd.setCursor(8, 0);
     lcd.print("P:");
     Serial.print(pump_check);
     lcd.print(pump_check);
-    Serial.print("F");
+    Serial.print(F("F"));
     lcd.setCursor(8, 1);
     lcd.print("F:");
     Serial.print(fan_check);
     lcd.print(fan_check);
     Serial.print(set_temp_min);
     Serial.print(set_humi_max);
-    Serial.print("L");
+    Serial.print(F("L"));
     if (ldrLux < 10.00) {
       Serial.print("000" + String(ldrLux));
     }

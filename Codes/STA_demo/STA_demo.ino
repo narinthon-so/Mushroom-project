@@ -978,13 +978,12 @@ void insertDB()
   if(line_notify_db){
     NotifyLine("Saving Data into Database.\nHTTP Response code: " + String(httpResponseCode));
   }
-  
+
+  /*if(httpResponseCode == -1){
+    ESP.restart();
+  }*/
   // Free resources
   http.end();
-
-  if(httpResponseCode == -1){
-    ESP.restart();
-  }
 }
 
 String httpGETRequest(const char *serverName)
@@ -1413,6 +1412,7 @@ void setup()
   line_notify_db = EEPROM.read(2);
   line_notify_onoff = EEPROM.read(3);
   
+  //insertDB();
 }
 
 void loop(void)
@@ -1423,7 +1423,7 @@ void loop(void)
 
   if (WiFi.status() != WL_CONNECTED)
   {
-    delay(2000);
+    //delay(2000);
     ESP.restart();       // คำสั่งรีเซ็ต ESP
   }
   

@@ -218,11 +218,11 @@ void loop() {
   }
 
   // print out the results
-//    Serial.print("LDR Raw Data   : "); Serial.println(ldrRawData);
-//    Serial.print("LDR Voltage    : "); Serial.print(ldrVoltage); Serial.println(" volts");
-//    Serial.print("LDR Resistance : "); Serial.print(ldrResistance); Serial.println(" Ohms");
-//    Serial.print("LDR Illuminance: "); Serial.print(ldrLux); Serial.println(" lux");
-//    Serial.println(pwmvalue);
+  //    Serial.print("LDR Raw Data   : "); Serial.println(ldrRawData);
+  //    Serial.print("LDR Voltage    : "); Serial.print(ldrVoltage); Serial.println(" volts");
+  //    Serial.print("LDR Resistance : "); Serial.print(ldrResistance); Serial.println(" Ohms");
+  //    Serial.print("LDR Illuminance: "); Serial.print(ldrLux); Serial.println(" lux");
+  //    Serial.println(pwmvalue);
   //*****************************************************************************
 
   //R sensing ************************************************************************
@@ -603,6 +603,9 @@ void loop() {
     }
     else if (ldrLux < 1000.00) {
       Serial.print("0" + String(ldrLux));
+    }
+    else if (ldrLux >= 10000.00) {
+      Serial.print("Rovflux");
     } else {
       Serial.print(ldrLux);
     }
@@ -702,6 +705,9 @@ void sendUpdateData() { //this function will call when sumting change ...
   }
   else if (ldrLux < 1000.00) {
     LoRa.print("0" + String(ldrLux));
+  }
+  else if (ldrLux >= 10000.00) {
+    Serial.print("Rovflux");
   } else {
     LoRa.print(ldrLux);
   }

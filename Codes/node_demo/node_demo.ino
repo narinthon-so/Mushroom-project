@@ -32,6 +32,8 @@ BH1750 lightMeter;
 float lux;
 int set_lux; //0-999
 const int ledPin = 2;
+const int ledPin_2 = 0;
+bool ledPin_2_sate;
 // setting PWM properties
 const int freq = 547;
 const int ledChannel = 0;
@@ -88,8 +90,10 @@ void setup() {
 
   pinMode(pump, OUTPUT);
   pinMode(fan, OUTPUT);
+  pinMode(ledPin_2, OUTPUT);
   digitalWrite(pump, HIGH);
   digitalWrite(fan, HIGH);
+  digitalWrite(ledPin_2, HIGH);
 
   // configure LED PWM functionalitites
   ledcSetup(ledChannel, freq, resolution);
@@ -99,11 +103,11 @@ void setup() {
 
   EEPROM.begin(EEPROM_SIZE);
   Serial.begin(115200);
-  
+
   Wire.begin(21, 22, 100000);   // sda= GPIO_21 /scl= GPIO_22
   //Wire1.begin(16, 17, 100000); //sda_2= GPIO_16 /scl_2= GPIO_17
   lightMeter.begin(BH1750::ONE_TIME_HIGH_RES_MODE);
-  
+
   // Wake up the sensor
   Wire.beginTransmission(AM2315_I2CADDR);
   delay(2);
@@ -212,6 +216,7 @@ void loop() {
       if (pwmvalue == 100) {
         pwmvalue = 100;
       }
+      ledPin_2_sate = false;
     }
     else if (lux > set_lux) {
       if (pwmvalue > 0) {
@@ -220,8 +225,10 @@ void loop() {
       if (pwmvalue == 0) {
         pwmvalue = 0;
       }
+      ledPin_2_sate = true;
     }
     ledcWrite(ledChannel, pwm(pwmvalue));
+    digitalWrite(ledPin_2, ledPin_2_sate);
     //Serial.println(day);
   }
 

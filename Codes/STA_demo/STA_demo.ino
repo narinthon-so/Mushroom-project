@@ -1093,6 +1093,7 @@ void setup()
 
     json = httpGETRequest(serverName);
     Serial.println(json);
+          
     JSONVar myObject = JSON.parse(json);
 
     // JSON.typeof(jsonVar) can be used to get the type of the var
@@ -1140,6 +1141,11 @@ void setup()
 
   Serial.println(web_server_url);
   Serial.println(database_server_url);
+  Serial.println(web_server_url.length());
+  Serial.println(database_server_url.length());
+  if(web_server_url.length() == 0 && database_server_url.length() == 0){
+    ESP.restart();
+  }
   //------------------------------------------------------------------
   //LINE Notify
   String line_notify_text = "";

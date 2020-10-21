@@ -2,10 +2,12 @@
 
 #include "heltec.h"
 #include <EEPROM.h>
-//#include <Wire.h>
+#include <Wire.h>
 #include <LiquidCrystal_I2C.h>
+#include <BH1750.h>
 
 LiquidCrystal_I2C lcd(0x27, 16, 2);
+BH1750 lightMeter;
 
 #define EEPROM_SIZE 512
 #define BAND    433E6  //you can set band here directly,e.g. 868E6,915E6
@@ -14,19 +16,20 @@ LiquidCrystal_I2C lcd(0x27, 16, 2);
 #define sw3 15 //sw for control fan
 #define pump 33
 #define fan 4
-
-//*************************************************************************//
-// These constants, define values needed for the LDR readings and ADC
-#define LDR_PIN                   25
-#define MAX_ADC_READING           4095
-#define ADC_REF_VOLTAGE           3.3
-#define REF_RESISTANCE            5030  // measure this for best results
-#define LUX_CALC_SCALAR           12518931
-#define LUX_CALC_EXPONENT         -1.405
-int   ldrRawData;
-float resistorVoltage, ldrVoltage;
-float ldrResistance;
-float ldrLux;
+/*
+  //******************************** LDR *****************************************
+  // These constants, define values needed for the LDR readings and ADC
+  #define LDR_PIN                   25
+  #define MAX_ADC_READING           4095
+  #define ADC_REF_VOLTAGE           3.3
+  #define REF_RESISTANCE            5030  // measure this for best results
+  #define LUX_CALC_SCALAR           12518931
+  #define LUX_CALC_EXPONENT         -1.405
+  int   ldrRawData;
+  float resistorVoltage, ldrVoltage;
+  float ldrResistance;
+  //**************************************************************************/
+float lux;
 int set_lux; //0-999
 const int ledPin = 2;
 // setting PWM properties
@@ -96,8 +99,11 @@ void setup() {
 
   EEPROM.begin(EEPROM_SIZE);
   Serial.begin(115200);
-  Wire.begin (21, 22);   // sda= GPIO_21 /scl= GPIO_22
-
+  
+  Wire.begin(21, 22, 100000);   // sda= GPIO_21 /scl= GPIO_22
+  //Wire1.begin(16, 17, 100000); //sda_2= GPIO_16 /scl_2= GPIO_17
+  lightMeter.begin(BH1750::ONE_TIME_HIGH_RES_MODE);
+  
   // Wake up the sensor
   Wire.beginTransmission(AM2315_I2CADDR);
   delay(2);
@@ -176,28 +182,30 @@ void loop() {
     sendUpdateData();
   }
 
-  //********************************* LDR Lux Meter *******************************
-  // Perform the analog to digital conversion
-  ldrRawData = analogRead(LDR_PIN);
+  /*//********************************* LDR Lux Meter *******************************
+    // Perform the analog to digital conversion
+    ldrRawData = analogRead(LDR_PIN);
 
-  // RESISTOR VOLTAGE_CONVERSION
-  // Convert the raw digital data back to the voltage that was measured on the analog pin
-  resistorVoltage = (float)ldrRawData / MAX_ADC_READING * ADC_REF_VOLTAGE;
+    // RESISTOR VOLTAGE_CONVERSION
+    // Convert the raw digital data back to the voltage that was measured on the analog pin
+    resistorVoltage = (float)ldrRawData / MAX_ADC_READING * ADC_REF_VOLTAGE;
 
-  // voltage across the LDR is the 3.3V supply minus the 5k resistor voltage
-  ldrVoltage = ADC_REF_VOLTAGE - resistorVoltage;
+    // voltage across the LDR is the 3.3V supply minus the 5k resistor voltage
+    ldrVoltage = ADC_REF_VOLTAGE - resistorVoltage;
 
-  // LDR_RESISTANCE_CONVERSION
-  // resistance that the LDR would have for that voltage
-  ldrResistance = ldrVoltage / resistorVoltage * REF_RESISTANCE;
+    // LDR_RESISTANCE_CONVERSION
+    // resistance that the LDR would have for that voltage
+    ldrResistance = ldrVoltage / resistorVoltage * REF_RESISTANCE;
 
-  // LDR_LUX
-  // Change the code below to the proper conversion from ldrResistance to
-  // ldrLux
-  ldrLux = LUX_CALC_SCALAR * pow(ldrResistance, LUX_CALC_EXPONENT);
+    // LDR_LUX
+    // Change the code below to the proper conversion from ldrResistance to
+    // lux
+    lux = LUX_CALC_SCALAR * pow(ldrResistance, LUX_CALC_EXPONENT);
+    //**********************************************************************************/
+  lux = lightMeter.readLightLevel();
 
   if (day) {
-    if (ldrLux < set_lux) {
+    if (lux < set_lux) {
       if (pwmvalue < 100) {
         pwmvalue++;
       }
@@ -205,7 +213,7 @@ void loop() {
         pwmvalue = 100;
       }
     }
-    else if (ldrLux > set_lux) {
+    else if (lux > set_lux) {
       if (pwmvalue > 0) {
         pwmvalue--;
       }
@@ -221,7 +229,7 @@ void loop() {
   //    Serial.print("LDR Raw Data   : "); Serial.println(ldrRawData);
   //    Serial.print("LDR Voltage    : "); Serial.print(ldrVoltage); Serial.println(" volts");
   //    Serial.print("LDR Resistance : "); Serial.print(ldrResistance); Serial.println(" Ohms");
-  //    Serial.print("LDR Illuminance: "); Serial.print(ldrLux); Serial.println(" lux");
+  //    Serial.print("LDR Illuminance: "); Serial.print(lux); Serial.println(" lux");
   //    Serial.println(pwmvalue);
   //*****************************************************************************
 
@@ -595,19 +603,19 @@ void loop() {
     Serial.print(set_temp_min);
     Serial.print(set_humi_max);
     Serial.print(F("L"));
-    if (ldrLux < 10.00) {
-      Serial.print("000" + String(ldrLux));
+    if (lux < 10.00) {
+      Serial.print("000" + String(lux));
     }
-    else if (ldrLux < 100.00) {
-      Serial.print("00" + String(ldrLux));
+    else if (lux < 100.00) {
+      Serial.print("00" + String(lux));
     }
-    else if (ldrLux < 1000.00) {
-      Serial.print("0" + String(ldrLux));
+    else if (lux < 1000.00) {
+      Serial.print("0" + String(lux));
     }
-    else if (ldrLux >= 10000.00) {
+    else if (lux >= 10000.00) {
       Serial.print("Rovflux");
     } else {
-      Serial.print(ldrLux);
+      Serial.print(lux);
     }
     if (set_lux < 100) {
       Serial.print("0" + String(set_lux));
@@ -697,19 +705,19 @@ void sendUpdateData() { //this function will call when sumting change ...
   LoRa.print(set_temp_min);
   LoRa.print(set_humi_max);
   LoRa.print("L");
-  if (ldrLux < 10.00) {
-    LoRa.print("000" + String(ldrLux));
+  if (lux < 10.00) {
+    LoRa.print("000" + String(lux));
   }
-  else if (ldrLux < 100.00) {
-    LoRa.print("00" + String(ldrLux));
+  else if (lux < 100.00) {
+    LoRa.print("00" + String(lux));
   }
-  else if (ldrLux < 1000.00) {
-    LoRa.print("0" + String(ldrLux));
+  else if (lux < 1000.00) {
+    LoRa.print("0" + String(lux));
   }
-  else if (ldrLux >= 10000.00) {
+  else if (lux >= 10000.00) {
     Serial.print("Rovflux");
   } else {
-    LoRa.print(ldrLux);
+    LoRa.print(lux);
   }
   if (set_lux < 100) {
     LoRa.print("0" + String(set_lux));

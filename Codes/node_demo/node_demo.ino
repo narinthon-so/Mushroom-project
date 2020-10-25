@@ -74,7 +74,10 @@ Adafruit_AM2315 am2315;
 // Connect YELLOW to i2c data
 
 unsigned long previousMillis = 0;
-const long interval = 1000;
+unsigned long previousMillis_am2315 = 0;
+const int interval = 1000;
+const int interval_am2315 = 2000;
+
 
 float temp, humi;
 
@@ -278,7 +281,7 @@ void loop() {
 
   //  temp = dht.readTemperature();
   //  humi = dht.readHumidity();
-  am2315.readTemperatureAndHumidity(&temp, &humi);
+  //am2315.readTemperatureAndHumidity(&temp, &humi);
   //*****************************************************************************
 
   //serial **********************************************************************
@@ -560,6 +563,10 @@ void loop() {
 
   //print data to VB-------------------------------------------------
   unsigned long currentMillis = millis();
+  if (currentMillis - previousMillis_am2315 >= interval_am2315) {
+    previousMillis_am2315 = currentMillis;
+    am2315.readTemperatureAndHumidity(&temp, &humi);
+  }
   if (currentMillis - previousMillis >= interval) {
     previousMillis = currentMillis;
     lcd.clear();
@@ -659,31 +666,6 @@ void loraSend(String datasend) {
 }
 
 void sendUpdateData() { //this function will call when sumting change ...
-  //--------------------------------------------R sensing
-  // Reading adc values
-  //  for (int i = 0; i < 10; i++) {
-  //    adc_pump_value = adc_pump_value + analogRead(R_sensing_pump);
-  //  }
-  //  adc_pump_value = adc_pump_value / 10;
-  //
-  //  adc_fan_value = analogRead(R_sensing_fan);
-  //  //Serial.print(adc_pump_value); Serial.print("  "); Serial.println(adc_fan_value);
-  //
-  //  //calculate to voltage
-  //  Rs_pump_voltage = (adc_pump_value * 3.3 / 4095);
-  //  Rs_fan_voltage = (adc_fan_value * 3.3 / 4095);
-  //  //Serial.print(Rs_pump_voltage); Serial.print("  "); Serial.println(Rs_fan_voltage);
-  //  if (Rs_pump_voltage > 0.01) {
-  //    pump_check = true;
-  //  } else {
-  //    pump_check = false;
-  //  }
-  //  if (Rs_fan_voltage > 0.10) {
-  //    fan_check = true;
-  //  } else {
-  //    fan_check = false;
-  //  }
-  //  //----------------------------------------------------
   LoRa.beginPacket();
   LoRa.print(String(des) + String(ipAddr));
   LoRa.print("T");

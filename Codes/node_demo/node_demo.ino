@@ -505,8 +505,8 @@ void loop() {
       pumpState = false; fanState = false;
     }
     if (temp < set_temp_min && humi > set_humi_max) {
-      pumpState = false; fanState = true;
-      //fanState = false;
+      pumpState = false; //fanState = true;
+      fanState = false;
     }
     if ((temp >= set_temp_min && temp <= set_temp_max) && humi < set_humi_min) {
       pumpState = true; fanState = false;
@@ -515,8 +515,8 @@ void loop() {
       pumpState = false; fanState = false;
     }
     if ((temp >= set_temp_min && temp <= set_temp_max) && humi > set_humi_max) {
-      pumpState = false; fanState = true;
-      //fanState = false;
+      pumpState = false; //fanState = true;
+      fanState = false;
     }
     if (temp > set_temp_max && humi < set_humi_min) {
       pumpState = true; fanState = true;

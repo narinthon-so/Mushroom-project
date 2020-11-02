@@ -21,6 +21,8 @@ LiquidCrystal_I2C lcd(0x27, 16, 2);
 #define led_check_wifi_status 2
 #include "config.h"
 
+int httpResponseCode;
+
 // variables for get ngrok public url
 String json;
 String tunnelsNameArr[2];
@@ -948,9 +950,8 @@ void NotifyLine(String t)
 
 void insertDB()
 {
-  // Your Domain name with URL path or IP address with path
-  const String serverName = "http://192.168.0.105/post-esp-data.php";
-  http.begin(serverName);
+
+  http.begin(serverName_db);
 
   // Specify content-type header
   http.addHeader("Content-Type", "application/x-www-form-urlencoded");
@@ -973,15 +974,8 @@ void insertDB()
   String httpRequestData = "api_key=" + apiKeyValue + "&temp=" + String(temp) + "&humi=" + String(humi) + "&temp_limit_min=" + String(set_temp_min) + "&temp_limit_max=" + String(set_temp_max) + "&humi_limit_min=" + String(set_humi_min) + "&humi_limit_max=" + String(set_humi_max) + "&ctrl_mode=" + ctrlModeStr + "&pump_state=" + pumpStateStr + "&fan_state=" + fanStateStr + "&lux=" + String(lux) + "&set_lux=" + String(set_lux) + "";
 
   // Send HTTP POST request
-  int httpResponseCode = http.POST(httpRequestData);
-  
-  if(line_notify_db){
-    NotifyLine("Saving Data into Database.\nHTTP Response code: " + String(httpResponseCode));
-  }
+  httpResponseCode = http.POST(httpRequestData);
 
-  /*if(httpResponseCode == -1){
-    ESP.restart();
-  }*/
   // Free resources
   http.end();
 }
@@ -1091,7 +1085,7 @@ void setup()
   if (WiFi.status() == WL_CONNECTED)
   {
 
-    json = httpGETRequest(serverName);
+    json = httpGETRequest(serverName_url);
     Serial.println(json);
           
     JSONVar myObject = JSON.parse(json);
@@ -1588,6 +1582,9 @@ void loop(void)
     insertDB();
     delay(1000);
     //Serial.println("Insert into DB...");
+    if(line_notify_db){
+      NotifyLine("Saving Data into Database.\nHTTP Response code: " + String(httpResponseCode));
+    }
   }
   //**************************************************************************************************************
   //*********************************** DAY CHECK *******************************************************************

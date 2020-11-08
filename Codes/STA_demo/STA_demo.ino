@@ -46,6 +46,7 @@ float lux;
 int set_lux;
 
 bool pump_check, fan_check, mode_check;
+String ctrlModeStr, pumpStateStr, fanStateStr;
 
 //****************** LINE NOTIFY SETTING ******************************
 bool line_notify_mode, line_notify_db, line_notify_onoff;
@@ -948,7 +949,7 @@ void NotifyLine(String t)
   }
 }
 
-void insertDB()
+void insertDB(String x)
 {
 
   http.begin(serverName_db);
@@ -956,25 +957,8 @@ void insertDB()
   // Specify content-type header
   http.addHeader("Content-Type", "application/x-www-form-urlencoded");
 
-  String ctrlModeStr, pumpStateStr, fanStateStr;
-  if (ctrlMode == 1){
-    ctrlModeStr = "MANUAL";
-  }else{
-    ctrlModeStr = "AUTO";
-  }if (pumpState == 1){
-    pumpStateStr = "ON";
-  }else{
-    pumpStateStr = "OFF";
-  }if (fanState == 1){
-    fanStateStr = "ON";
-  }else{
-    fanStateStr = "OFF";
-  }
-  // Prepare your HTTP POST request data
-  String httpRequestData = "api_key=" + apiKeyValue + "&temp=" + String(temp) + "&humi=" + String(humi) + "&temp_limit_min=" + String(set_temp_min) + "&temp_limit_max=" + String(set_temp_max) + "&humi_limit_min=" + String(set_humi_min) + "&humi_limit_max=" + String(set_humi_max) + "&ctrl_mode=" + ctrlModeStr + "&pump_state=" + pumpStateStr + "&fan_state=" + fanStateStr + "&lux=" + String(lux) + "&set_lux=" + String(set_lux) + "";
-
   // Send HTTP POST request
-  httpResponseCode = http.POST(httpRequestData);
+  httpResponseCode = http.POST(x);
 
   // Free resources
   http.end();
@@ -1417,6 +1401,20 @@ void setup()
 
 void loop(void)
 {
+      if (ctrlMode == 1){
+         ctrlModeStr = "MANUAL";
+      }else{
+         ctrlModeStr = "AUTO";
+      }if (pumpState == 1){
+         pumpStateStr = "ON";
+      }else{
+         pumpStateStr = "OFF";
+      }if (fanState == 1){
+        fanStateStr = "ON";
+      }else{
+        fanStateStr = "OFF";
+      }
+      
   pump_check = pumpState;
   fan_check = fanState;
   mode_check = ctrlMode;
@@ -1579,11 +1577,19 @@ void loop(void)
   //*********************************** SAVE DATA EVERY HOUR *******************************************************************
   if (strcmp(timeSec, second_db) == 0 && strcmp(timeMin, minute_db) == 0)
   {
-    insertDB();
-    delay(1000);
-    //Serial.println("Insert into DB...");
-    if(line_notify_db){
+    
+      // Prepare your HTTP POST request data
+      String httpRequestData = "api_key=" + apiKeyValue + "&temp=" + String(temp) + "&humi=" + String(humi) + "&temp_limit_min=" + String(set_temp_min) + "&temp_limit_max=" + String(set_temp_max) + "&humi_limit_min=" + String(set_humi_min) + "&humi_limit_max=" + String(set_humi_max) + "&ctrl_mode=" + ctrlModeStr + "&pump_state=" + pumpStateStr + "&fan_state=" + fanStateStr + "&lux=" + String(lux) + "&set_lux=" + String(set_lux) + "";
+
+      insertDB(httpRequestData);
+      
+      delay(1000);
+      
+      //Serial.println("Insert into DB...");
+      
+      if(line_notify_db){
       NotifyLine("Saving Data into Database.\nHTTP Response code: " + String(httpResponseCode));
+      
     }
   }
   //**************************************************************************************************************

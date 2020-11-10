@@ -21,7 +21,7 @@ LiquidCrystal_I2C lcd(0x27, 16, 2);
 #define led_check_wifi_status 2
 #include "config.h"
 
-int httpResponseCode;
+//int httpResponseCode;
 
 // variables for get ngrok public url
 String json;
@@ -46,7 +46,8 @@ float lux;
 int set_lux;
 
 bool pump_check, fan_check, mode_check;
-String ctrlModeStr, pumpStateStr, fanStateStr;
+
+//String httpRequestData;
 
 //****************** LINE NOTIFY SETTING ******************************
 bool line_notify_mode, line_notify_db, line_notify_onoff;
@@ -71,7 +72,7 @@ unsigned long previousMillis_request = 0;
 unsigned long previousMillis_vb = 0;
 //unsigned long previousMillis_db = 0;
 const int interval_request = 60000; //Interval for request data via lora
-const int interval_vb = 1000;       //Interval for print data to VB(Windows App)
+const int interval_vb = 2000;       //Interval for print data to VB(Windows App)
 //const unsigned long interval_db = 40000;  //Interval for insert data into database server
 
 // Create AsyncWebServer object on port 80
@@ -949,19 +950,42 @@ void NotifyLine(String t)
   }
 }
 
-void insertDB(String x)
+void insertDB()
 {
+      //HTTPClient http2;
+      String ctrlModeStr, pumpStateStr, fanStateStr;
+      if (ctrlMode == 1){
+         ctrlModeStr = "MANUAL";
+      }else{
+         ctrlModeStr = "AUTO";
+      }if (pumpState == 1){
+         pumpStateStr = "ON";
+      }else{
+         pumpStateStr = "OFF";
+      }if (fanState == 1){
+        fanStateStr = "ON";
+      }else{
+        fanStateStr = "OFF";
+      }
 
-  http.begin(serverName_db);
+      //const String serverName_db = database_server_url + "/post-esp-data.php";
+      
+      http.begin(serverName_db);
+      http.addHeader("Content-Type", "application/x-www-form-urlencoded");
+      // Prepare your HTTP POST request data
+      String httpRequestData = "api_key=" + apiKeyValue + "&temp=" + String(temp) + "&humi=" + String(humi) + "&temp_limit_min=" + String(set_temp_min) + "&temp_limit_max=" + String(set_temp_max) + "&humi_limit_min=" + String(set_humi_min) + "&humi_limit_max=" + String(set_humi_max) + "&ctrl_mode=" + ctrlModeStr + "&pump_state=" + pumpStateStr + "&fan_state=" + fanStateStr + "&lux=" + String(lux) + "&set_lux=" + String(set_lux);
+      //Serial.println(httpRequestData);
+      int httpResponseCode = http.POST(httpRequestData);
+      //insertDB(httpRequestData);
 
-  // Specify content-type header
-  http.addHeader("Content-Type", "application/x-www-form-urlencoded");
+      //delay(1000);
+      
+      if(line_notify_db){
+       NotifyLine("Saving Data into Database.\nHTTP Response code: " + String(httpResponseCode));  
+      }
+      // Free resources
+      http.end();
 
-  // Send HTTP POST request
-  httpResponseCode = http.POST(x);
-
-  // Free resources
-  http.end();
 }
 
 String httpGETRequest(const char *serverName)
@@ -1401,20 +1425,8 @@ void setup()
 
 void loop(void)
 {
-      if (ctrlMode == 1){
-         ctrlModeStr = "MANUAL";
-      }else{
-         ctrlModeStr = "AUTO";
-      }if (pumpState == 1){
-         pumpStateStr = "ON";
-      }else{
-         pumpStateStr = "OFF";
-      }if (fanState == 1){
-        fanStateStr = "ON";
-      }else{
-        fanStateStr = "OFF";
-      }
-      
+  unsigned long currentMillis = millis();
+  
   pump_check = pumpState;
   fan_check = fanState;
   mode_check = ctrlMode;
@@ -1440,8 +1452,6 @@ void loop(void)
     delay(200);
     loraSend (node1 + "F");
   }
-  
-  unsigned long currentMillis = millis();
   
   while (Serial.available())
   { //Serial from VB
@@ -1510,15 +1520,18 @@ void loop(void)
     }
     //Serial.println(set_lux);
   }
-
+  
   //for request data via lora every 60s
   if (currentMillis - previousMillis_request >= interval_request)
   {
     previousMillis_request = currentMillis;
+    
+    //insertDB();
+    
     loraSend(node1 + "R");
   }
 
-  //for print data to VB(Windows App) every 1s
+  //for print data to VB(Windows App) every 2s
   if (currentMillis - previousMillis_vb >= interval_vb)
   {
     previousMillis_vb = currentMillis;
@@ -1544,6 +1557,7 @@ void loop(void)
     lcd.setCursor(8, 1);
     lcd.print("F:");
     lcd.print(fanState);
+
   }
 
   /*//for insert data into database server
@@ -1577,20 +1591,9 @@ void loop(void)
   //*********************************** SAVE DATA EVERY HOUR *******************************************************************
   if (strcmp(timeSec, second_db) == 0 && strcmp(timeMin, minute_db) == 0)
   {
-    
-      // Prepare your HTTP POST request data
-      String httpRequestData = "api_key=" + apiKeyValue + "&temp=" + String(temp) + "&humi=" + String(humi) + "&temp_limit_min=" + String(set_temp_min) + "&temp_limit_max=" + String(set_temp_max) + "&humi_limit_min=" + String(set_humi_min) + "&humi_limit_max=" + String(set_humi_max) + "&ctrl_mode=" + ctrlModeStr + "&pump_state=" + pumpStateStr + "&fan_state=" + fanStateStr + "&lux=" + String(lux) + "&set_lux=" + String(set_lux) + "";
-
-      insertDB(httpRequestData);
-      
-      delay(1000);
-      
-      //Serial.println("Insert into DB...");
-      
-      if(line_notify_db){
-      NotifyLine("Saving Data into Database.\nHTTP Response code: " + String(httpResponseCode));
-      
-    }
+    insertDB();
+    delay(1000);
+    //Serial.println("Insert into DB...");   
   }
   //**************************************************************************************************************
   //*********************************** DAY CHECK *******************************************************************

@@ -110,7 +110,7 @@ void setup() {
 
   Wire.begin(21, 22, 100000);   // sda= GPIO_21 /scl= GPIO_22
   //Wire1.begin(16, 17, 100000); //sda_2= GPIO_16 /scl_2= GPIO_17
-  lightMeter.begin(BH1750::ONE_TIME_HIGH_RES_MODE);
+  //lightMeter.begin(BH1750::ONE_TIME_HIGH_RES_MODE);
 
   // Wake up the sensor
   Wire.beginTransmission(AM2315_I2CADDR);
@@ -212,7 +212,8 @@ void loop() {
     // lux
     lux = LUX_CALC_SCALAR * pow(ldrResistance, LUX_CALC_EXPONENT);
     //**********************************************************************************/
-  lux = lightMeter.readLightLevel();
+  //lux = lightMeter.readLightLevel();
+  lux = 203.65;
 
   if (day) {
     if (lux < set_lux) {
@@ -277,7 +278,7 @@ void loop() {
   last_pump_check = pump_check;
 
   if (fan_check != last_fan_check) {
-    sendUpdateData();
+    //sendUpdateData();
   }
   last_fan_check = fan_check;
   //***************************************************************************
@@ -569,7 +570,8 @@ void loop() {
   unsigned long currentMillis = millis();
   if (currentMillis - previousMillis_am2315 >= interval_am2315) {
     previousMillis_am2315 = currentMillis;
-    am2315.readTemperatureAndHumidity(&temp, &humi);
+    //am2315.readTemperatureAndHumidity(&temp, &humi);
+    temp = 25.30; humi = 85.60;
   }
   if (currentMillis - previousMillis >= interval) {
     previousMillis = currentMillis;

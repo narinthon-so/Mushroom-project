@@ -32,6 +32,6 @@ const char* http_username = "admin";
 const char* http_password = "admin";
 
 //Line token
-#define TokenLine "e8nUB7z2I40DrOUHtkmvyk8ttLgoESPJRajb2skHpmP"
+#define TokenLine "XbuIJelP0fcjc8uzdBZbbubpjkCfGsEZTQTVzh7oEke"
 
 #endif // CONFIG_H

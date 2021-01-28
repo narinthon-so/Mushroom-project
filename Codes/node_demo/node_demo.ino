@@ -110,7 +110,7 @@ void setup() {
 
   Wire.begin(21, 22, 100000);   // sda= GPIO_21 /scl= GPIO_22
   //Wire1.begin(16, 17, 100000); //sda_2= GPIO_16 /scl_2= GPIO_17
-  lightMeter.begin(BH1750::ONE_TIME_HIGH_RES_MODE);
+  //lightMeter.begin(BH1750::ONE_TIME_HIGH_RES_MODE);
 
   // Wake up the sensor
   Wire.beginTransmission(AM2315_I2CADDR);
@@ -212,7 +212,7 @@ void loop() {
     // lux
     lux = LUX_CALC_SCALAR * pow(ldrResistance, LUX_CALC_EXPONENT);
     //**********************************************************************************/
-  lux = lightMeter.readLightLevel();
+  //lux = lightMeter.readLightLevel();
 
   if (day) {
     if (lux < set_lux) {

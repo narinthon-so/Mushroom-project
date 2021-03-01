@@ -1,2 +1,6 @@
-1. โรงเรือนเพาะเห็ดนางฟ้าอัจฉริยะ
-2. การประยุกต์ใช้เทคโนโลยีอินเทอร์เน็ตของสรรพสิ่งสำหรับควบคุมโรงเรือนเพาะเห็ดนางฟ้า
+1. โรงเพาะเห็ดอัจฉริยะโดยใช้เทคโนโลยีการสื่อสารไร้สายระยะไกล
+    smart mushroom farm using long range wireless communication technology
+
+2. โรงเพาะเห็ดเห็ดอัจฉริยะโดยใช้เทคโนโลยีการสื่อสาร LoRa
+   smart mushroom farm using LoRa communication technology
+

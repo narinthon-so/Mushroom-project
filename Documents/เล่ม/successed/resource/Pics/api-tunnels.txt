@@ -1,0 +1,129 @@
+array(2) {
+  ["tunnels"]=>
+  array(2) {
+    [0]=>
+    array(6) {
+      ["name"]=>
+      string(15) "database_server"
+      ["uri"]=>
+      string(28) "/api/tunnels/database_server"
+      ["public_url"]=>
+      string(31) "http://806529fb8a62.ap.ngrok.io"
+      ["proto"]=>
+      string(4) "http"
+      ["config"]=>
+      array(2) {
+        ["addr"]=>
+        string(19) "http://localhost:80"
+        ["inspect"]=>
+        bool(true)
+      }
+      ["metrics"]=>
+      array(2) {
+        ["conns"]=>
+        array(9) {
+          ["count"]=>
+          int(108)
+          ["gauge"]=>
+          int(1)
+          ["rate1"]=>
+          float(0.00016038202592845)
+          ["rate5"]=>
+          float(0.0030787565299551)
+          ["rate15"]=>
+          float(0.0060618060092319)
+          ["p50"]=>
+          float(5022105021.5)
+          ["p90"]=>
+          float(8168560550.3)
+          ["p95"]=>
+          float(9676036265.8)
+          ["p99"]=>
+          float(18781546355.95)
+        }
+        ["http"]=>
+        array(8) {
+          ["count"]=>
+          int(235)
+          ["rate1"]=>
+          float(0.00014802486331817)
+          ["rate5"]=>
+          float(0.0034689748188683)
+          ["rate15"]=>
+          float(0.0097215171046185)
+          ["p50"]=>
+          int(56441572)
+          ["p90"]=>
+          float(229256621.8)
+          ["p95"]=>
+          float(628253087)
+          ["p99"]=>
+          float(2179937896.8)
+        }
+      }
+    }
+    [1]=>
+    array(6) {
+      ["name"]=>
+      string(10) "web_server"
+      ["uri"]=>
+      string(23) "/api/tunnels/web_server"
+      ["public_url"]=>
+      string(32) "https://765b53d60466.ap.ngrok.io"
+      ["proto"]=>
+      string(5) "https"
+      ["config"]=>
+      array(2) {
+        ["addr"]=>
+        string(24) "http://192.168.43.202:80"
+        ["inspect"]=>
+        bool(true)
+      }
+      ["metrics"]=>
+      array(2) {
+        ["conns"]=>
+        array(9) {
+          ["count"]=>
+          int(2051)
+          ["gauge"]=>
+          int(0)
+          ["rate1"]=>
+          float(1.6973266330629)
+          ["rate5"]=>
+          float(1.7300920589805)
+          ["rate15"]=>
+          float(1.2795583883516)
+          ["p50"]=>
+          float(231338355.5)
+          ["p90"]=>
+          float(360350576.3)
+          ["p95"]=>
+          float(1236985498.35)
+          ["p99"]=>
+          float(1337606119.34)
+        }
+        ["http"]=>
+        array(8) {
+          ["count"]=>
+          int(2051)
+          ["rate1"]=>
+          float(1.6973266330501)
+          ["rate5"]=>
+          float(1.7300906854195)
+          ["rate15"]=>
+          float(1.279556590076)
+          ["p50"]=>
+          int(27194176)
+          ["p90"]=>
+          float(52256036.4)
+          ["p95"]=>
+          float(57102678.5)
+          ["p99"]=>
+          float(63817342.17)
+        }
+      }
+    }
+  }
+  ["uri"]=>
+  string(12) "/api/tunnels"
+}
